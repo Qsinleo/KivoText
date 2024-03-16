@@ -1,0 +1,48 @@
+[
+    {
+        "label": "woodenNote",
+        "name": "Smartsian",
+        "author": "Leoministry",
+        "info": "木制便签样式",
+        "cssVars": {
+            "--light-bg": "rgb(247, 233, 209)",
+            "--medium-bg": "rgb(243,222,165)",
+            "--yellow-color": "yellow",
+            "--light-blue-color": "rgb(187,255,255)",
+            "--blue-color": "cyan",
+            "--dark-blue-color": "blue",
+            "--orange-color": "rgb(255,102,0)",
+            "--light-red-color": "rgb(252,218,218)",
+            "--light-green-color": "rgb(200,255,200)",
+            "--light-yellow-color": "rgb(255,223,164)",
+            "--high-light-color": " #ebff66",
+            "--green-color": "green",
+            "--red-color": "red",
+            "--default-btn-color": "",
+            "--default-btn-bg": "white"
+        }
+    },
+    {
+        "label": "blueArchive",
+        "name": "蔚蓝",
+        "info": "蔚蓝样式",
+        "author": "DuckXu",
+        "cssVars": {
+            "--light-bg": "#E0ECF8",
+            "--medium-bg": "#BFE9FF",
+            "--yellow-color": "#87CEFA",
+            "--light-blue-color": "#87CEFA",
+            "--blue-color": "#00BFFF",
+            "--dark-blue-color": "#007FFF",
+            "--orange-color": "#FFD700",
+            "--light-red-color": "#FFA07A",
+            "--light-green-color": "#90EE90",
+            "--light-yellow-color": "#FFFF99",
+            "--high-light-color": "#EBFF66",
+            "--green-color": "",
+            "--red-color": "",
+            "--default-btn-color": "",
+            "--default-btn-bg": ""
+        }
+    }
+]

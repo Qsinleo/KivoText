@@ -1,0 +1,469 @@
+<!DOCTYPE html>
+<html>
+
+	<head>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="initial-scale=1.0">
+		<title>在线文档/剪贴板</title>
+		<link rel="stylesheet" href="style.css">
+		<link rel="stylesheet" href="miFonts.css">
+	</head>
+
+	<body>
+		<main>
+			<div id="on-loading" class="center">
+				<div class="loading-circle" id="loading-circle-1"></div>
+				<h2>正在加载……</h2>
+				<div><small>正在加载<span id="now-loading-content">DOMContent</span></small></div>
+				<p>欢迎来到<b>KivoText</b>！</p>
+			</div>
+			<div id="popup-shade"></div>
+			<div id="popup-border">
+
+				<div>
+					<div class="pop-content" type="more-account-settings">
+						<h2>账号操作</h2>
+						<div class="seperator">更改用户名</div>
+						<div id="change-username-panel">
+							<div><label>输入新的用户名：<input type="text" maxlength="18"></label>
+								<div class="red-text"></div>
+							</div>
+							<button>提交</button>
+							<button>重置</button>
+						</div>
+						<div class="seperator">更改密码</div>
+						<div>
+							<table id="change-password-panel">
+								<tr>
+									<td>原密码：</td>
+									<td><input type="password"></td>
+								</tr>
+								<tr>
+									<td></td>
+									<td colspan="2" class="red-text"></td>
+								</tr>
+								<tr>
+									<td>新密码：</td>
+									<td><input type="password"></td>
+								</tr>
+								<tr>
+									<td></td>
+									<td colspan="2" class="red-text"></td>
+								</tr>
+								<tr>
+									<td>确认密码：</td>
+									<td><input type="password"></td>
+								</tr>
+								<tr>
+									<td></td>
+									<td colspan="2" class="red-text"></td>
+								</tr>
+							</table>
+							<div>
+								<button>提交</button>
+								<button>重置</button>
+							</div>
+						</div>
+						<small>本功能建议经常使用，以防隐私泄露。</small>
+						<div class="seperator">危险区域</div>
+						<div>
+							<button id="delete-account-link" class="red">注销账号</button>
+						</div>
+					</div>
+					<div class="pop-content" type="upload-files">
+						<h2>上传文件</h2>
+						<div class="seperator">文件限制一览</div>
+						<table>
+							<tr>
+								<td>已有文件数量</td>
+								<td><b id="uploaded-files-total-count-label"></b>/<span
+										class="files-count-limit-label"></span></td>
+							</tr>
+							<tr>
+								<td>文件长度限制</td>
+								<td><b class="file-length-limit-label"></b></td>
+							</tr>
+							<tr>
+								<td>文件名长度限制</td>
+								<td><b id="file-name-length-limit-label"></b></td>
+							</tr>
+						</table>
+						<div class="seperator">上传文件</div>
+						<div>
+							<div>
+								<input type="file" multiple accept=".txt"
+									id="upload-files-input" /><small>提示：每一次选择都会在下方列表新增文件，允许多个文件。</small>
+							</div>
+						</div>
+						<div class="seperator">已上传的文件操作<button class="red" id="reset-uploaded-files-button">重置</button>
+						</div>
+						<div id="uploaded-files-list"><i>没有上传的文件。</i></div>
+						<div id="process-uploaded-files" class="center"><button class="green">上传</button>
+							<span class="red-text"></span>
+						</div>
+					</div>
+					<div class="pop-content" type="open-shared-file">
+						<h2>打开共享文件</h2>
+						<div class="seperator">输入共享码</div>
+						<small>在这里，你可以打开别人共享出来的文件。</small>
+						<div class="flex">
+							<div>
+								<div><label>请输入<b>共享码</b>：<input type="text" maxlength="6"
+											id="share-code-input" /></label>
+								</div>
+								<div><small>可在“共享设置”里查看共享码。</small></div>
+								<div>
+									<label>请输入<b>验证码</b>：<input type="text" maxlength="4" id="share-verify-code-input"
+											placeholder="长度为4，不区分大小写" /></label>
+								</div>
+							</div>
+							<div>
+								<div id="share-verify-code-canvas" class="center"></div>
+								<div class="center"><small>看不清？点击以切换</small></div>
+							</div>
+						</div>
+						<button id="read-shared-file-button">读取</button>
+
+						<div class="open-shared-file-status center">
+							文件状态 <span id="request-shared-file-status-label">等待共享码</span>
+						</div>
+						<div class="seperator">查看文件内容</div>
+						<div id="shared-file-info" class="center">
+							<small>名称</small>
+							<span class="strong"></span>
+							<small>ID</small>
+							<span></span>
+							<small>最后更改</small>
+							<span></span>
+							<small>持有人</small>
+							<span></span>
+							<small>阅览次数</small>
+							<span></span>
+						</div>
+						<div id="shared-file-operator" class="center">
+							<button class="red" id="close-shared-file-button">关闭文件</button>
+							<button class="green" id="copy-shared-file-button">一键复制</button>
+							<button class="blue" id="download-shared-file-button">下载</button>
+							<button class="yellow" id="resave-shared-file-button">转存</button>
+							<br>
+							<select>
+								<option value="12">12px</option>
+								<option value="14">14px</option>
+								<option value="16" selected>16px</option>
+								<option value="18">18px</option>
+								<option value="20">20px</option>
+								<option value="24">24px</option>
+								<option value="30">30px</option>
+							</select>
+							<label>自动换行<input type="checkbox" id="shared-file-is-auto-wrapped" checked /></label>
+						</div>
+						<textarea id="shared-file-text-editor" readonly></textarea>
+					</div>
+					<div class="pop-content" type="theme-selector">
+						<h2>主题设置</h2>
+						<div class="seperator">字体选择</div>
+						<p>自带的字体为MiSans，由小米公司开发。</p>
+						<select id="font-selector">
+							<optgroup label="MiSans">
+								<option value="MiSans,500">MiSans ExtraBold</option>
+								<option value="MiSans,400">MiSans Bold</option>
+								<option value="MiSans,300" selected>MiSans</option>
+								<option value="MiSans,200">MiSans Light</option>
+							</optgroup>
+							<optgroup label="其他">
+								<option value="unset,unset">默认字体</option>
+							</optgroup>
+						</select>
+						<div class="seperator">主题选择</div>
+						<label>选择<select id="theme-selector">
+							</select></label>
+						<table id="selected-theme-info-table">
+							<tr>
+								<td>作者</td>
+								<td></td>
+							</tr>
+							<tr>
+								<td>介绍</td>
+								<td></td>
+							</tr>
+						</table>
+					</div>
+					<div class="pop-content" type="mobilephone-apk-recommend">
+						<h2>客户端KivoText推荐</h2>
+						<div class="seperator">介绍</div>
+						<p>在客户端的KivoText，你将获得更舒适的用户体验，以及全方位的UI适配。</p>
+						<div class="seperator">下载</div>
+						<p>客户端由Duckxu提供，请移步此处以下载：</p>
+						<p class="center"><a href="http://kivotext.duckxu.com">APK下载</a></p>
+						<p><small>提示：客户端版本可能与网页端版本略有不同，属正常现象</small></p>
+						<div class="center">
+							<label><input type="checkbox" id="no-ask-download-apk-again" checked>下次启动不再提示</label>
+						</div>
+					</div>
+					<div class="pop-content" type="shared-rule">
+						<h2>文件共享规则</h2>
+						<div class="seperator">未共享时</div>
+						<ul>
+							<li>每一次对文件做出新的更改，都将更新共享码。</li>
+							<li>共享码由区分文件和区分更改的两部分组成。</li>
+						</ul>
+						<div class="seperator">共享时</div>
+						<ul>
+							<li>用户无法编辑文件。</li>
+							<li>须关闭共享后，才能再次编辑并发布。</li>
+							<li><b>更新后的共享码会发生变化，请留意。</b></li>
+						</ul>
+					</div>
+				</div>
+				<div id="loading-in-popup">
+					<div></div>
+					<div id="loading-in-popup-foreground">
+						<div class="loading-circle" id="loading-circle-3"></div>
+						正在处理中……
+					</div>
+				</div>
+				<div id="close-hint" class="center">
+					点击此处以关闭
+				</div>
+			</div>
+
+			<div class="top-banner">
+				<div class="title center">KivoText</div>
+				<div id="login-info">
+					<div><b>登录信息</b></div>
+					<div id="login-info-menu">
+						名称 ID:<span class="user-id-label"></span><br>
+						<span class="user-name-label"></span>
+						<hr>
+						<small>上次在线时间<br>
+							<span id="last-online-time-label"></span>
+						</small>
+						<a id="more-account-settings-link">账号操作</a>
+						<a id="logout-link">退出登录</a>
+					</div>
+				</div>
+			</div>
+
+
+
+			</div>
+			<div id="need-login" class="center">
+				<h2>请先登录</h2>
+				<p>登录后可以使用个人文件和共享文件服务。</p>
+				<p>KivoText致力于为用户提供更隐私的服务，因此必须登录后才能使用。</p>
+				<p><button onclick="location.href = 'login.html'">登录</button>或<button
+						onclick="location.href = 'register.html'">注册</button></p>
+			</div>
+			<div id="main-body">
+				<button id="open-shared-file-link"><b>打开共享文件</b></button>
+				<div class="editor">
+					<div class="file-explorer">
+						<div>
+							<div>
+								<header>文件列表<button id="refresh-files-button">刷新</button></header>
+								<button class="blue" id="create-new-file-button">创建新文件</button>
+								<button class="green" id="upload-files-link">上传文件</button>
+							</div>
+
+							共<b id="total-files-label"></b>个文件
+						</div>
+						<div id="file-list">
+							<!-- There should be something. -->
+						</div>
+						<div class="multi-operation">
+							<div class="strong">文件(批量)操作</div>
+							<div>
+								已选<b id="has-selected-file-count-label">0</b>个文件&nbsp;
+								<button id="select-all-file-button">全部选择</button>
+								<button id="unselect-all-file-button">取消全部选择</button>
+								<button id="reversedly-select-all-file-button">反向选择</button>
+							</div>
+							<div id="files-operator-list">
+								<button class="blue file-operator-button" id="rename-file-button">重命名</button>
+								<button class="green file-operator-button" id="download-file-button">下载</button>
+								<button class="yellow file-operator-button" id="copy-file-button">另存为</button>
+								<button class="red file-operator-button" id="delete-file-button">删除</button>
+								<label><input type="checkbox" id="multi-operation-no-ask-again" />一次性完成操作</label>
+							</div>
+
+						</div>
+						<details>
+							<summary>查看限制</summary>
+							文件数上限<b class="files-count-limit-label"></b>
+							<b id="delete-file-able-label"></b>删除文件
+							单文件长度上限<b class="file-length-limit-label"></b>
+						</details>
+					</div>
+					<div class="editor-area">
+						<header>编辑区域<div class="ping-back">
+								服务器<span id="server-status">-</span><small id="ping-delay-label">-ms</small>
+							</div>
+						</header>
+						<div id="file-not-open-hint" class="center">
+							可在“文件列表”选择文件打开。
+						</div>
+						<div id="file-opened-area">
+							<div id="file-info" class="center">
+								<small>名称</small>
+								<span class="strong">[ERROR REQUESTING]</span>
+								<small>ID</small>
+								<span></span>
+								<small>最后更改</small>
+								<span></span>
+							</div>
+							<div id="file-operator" class="center">
+								<button class="red" id="close-file-button">关闭文件</button>
+								<button class="blue" id="save-file-button">保存</button>
+								<small id="file-save-status-label"></small>
+								<b><small id="file-editable-label">只读模式</small></b>
+								<details>
+									<summary>更多</summary>
+									<button class="yellow" id="copy-file-button-inedit">另存为</button>
+									<button class="green" id="download-file-button-inedit">下载</button>
+									<button class="blue" id="rename-file-button-inedit">重命名</button>
+									<button class="yellow" id="restore-file-button-inedit">恢复</button>
+									<button class="red" id="delete-file-button-inedit">删除</button>
+								</details>
+								<select>
+									<option value="12">12px</option>
+									<option value="14">14px</option>
+									<option value="16" selected>16px</option>
+									<option value="18">18px</option>
+									<option value="20">20px</option>
+									<option value="24">24px</option>
+									<option value="30">30px</option>
+								</select>
+								<label>自动换行<input type="checkbox" id="is-auto-wrapped" checked /></label>
+							</div>
+							<textarea id="main-text-editor"></textarea>
+							<div class="file-track">
+								<div id="file-track-labels" class="center">
+									<span>文本统计</span>
+									<span>共享设置</span>
+									<span>查找替换</span>
+									<span>权限查看</span>
+								</div>
+								<div id="file-track-contents">
+									<div>
+										<table id="text-static-table">
+											<tr>
+												<td>字符数（包含空格、标点符号等）</td>
+												<td><b></b></td>
+											</tr>
+											<tr>
+												<td>字符数（仅限字母、数字和汉字）</td>
+												<td><b></b></td>
+											</tr>
+											<tr>
+												<td>中文汉字数</td>
+												<td><b></b></td>
+											</tr>
+											<tr>
+												<td>行数</td>
+												<td><b></b></td>
+											</tr>
+											<tr>
+												<td>字节数（Bytes）</td>
+												<td><b></b></td>
+											</tr>
+										</table>
+									</div>
+									<div>
+										<table>
+											<tr>
+												<td>共享状态</td>
+												<td><span id="shared-status">未共享</s></td>
+												<td><button id="switch-share-status-button">开启共享</button></td>
+											</tr>
+											<tr>
+												<td>共享码</td>
+												<td><span id="share-code-label"></s></td>
+												<td><button id="copy-share-code-button">复制</button></td>
+											</tr>
+											<tr>
+												<td>已被阅览次数</td>
+												<td id="shared-file-visited-times-label"></td>
+												<td><button id="refresh-share-info-button">刷新</button></td>
+											</tr>
+										</table>
+										<details class="center">
+											<summary><small>已阅览人名单</small></summary>
+											<div id="has-read-shared-file-list" class="center">
+
+											</div>
+
+										</details>
+										<div class="center"><button id="shared-rule-link">共享规则</button></div>
+									</div>
+									<div>
+										<table id="search-and-replace-table">
+											<tr>
+												<td>查找文本</td>
+												<td><input type="text" placeholder="支持通配符（以/包围）" id="search-text-input">
+												</td>
+												<td>共有<b>0</b>个结果</td>
+											</tr>
+											<tr>
+												<td>
+												</td>
+												<td><label><input type="checkbox"
+															id="search-no-sense-of-capitialize">不区分大小写</label></td>
+												</td>
+											</tr>
+											<tr>
+												<td>替换为</td>
+												<td><input type="text" id="replace-text-input" /></td>
+												<td><button id="replace-text-button">替换</button></td>
+											</tr>
+										</table>
+									</div>
+									<div>
+										<table>
+											<tr>
+												<td>文件内容长度限制</td>
+												<td><b class="file-length-limit-label"></b></td>
+											</tr>
+											<tr>
+												<td>当前文件长度</td>
+												<td><b id="current-file-length-label"></b></td>
+											</tr>
+											<tr>
+												<td>剩余可输入长度</td>
+												<td><b id="file-left-length-label"></b></td>
+											</tr>
+											<tr>
+												<td colspan="2">一个中文汉字算作3文件长度，请注意规划。</td>
+											</tr>
+										</table>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+			<div id="in-process">
+				<div>
+				</div>
+				<div>
+					<div id="loading-circle-2" class="loading-circle"></div><span>加载中……</span>
+				</div>
+			</div>
+			<footer>
+				<div class="right">
+					<button id="download-apk-link">下载客户端</button>
+					<button id="theme-selector-link">主题设置</button>
+				</div>
+
+				Version 0.4.1 <a href="about.html">ABOUT Page</a>
+			</footer>
+		</main>
+	</body>
+	<!-- SCRIPTS -->
+	<script src="script/sha1.js"></script>
+	<script src="script/tools.js"></script>
+	<script src="script/bindEvents.js"></script>
+	<script src="script/script.js"></script>
+	<script src="script/verify.js"></script>
+
+</html>
