@@ -460,8 +460,6 @@ footer .right button {
 }
 
 .file-name {
-    display: inline-block;
-    width: calc(100% - 50px);
     font-size: large;
     font-weight: bold;
 }
@@ -527,8 +525,11 @@ footer .right button {
     font-family: Consolas, "Courier New", monospace;
 }
 
-#in-process>div:first-child {
+#in-process {
     display: none;
+}
+
+#in-process>div:first-child {
     position: fixed;
     left: 0;
     top: 0;
