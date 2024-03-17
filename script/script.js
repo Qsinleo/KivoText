@@ -336,12 +336,6 @@ function loadUserInfo(callback = {}) {
     sendRequest("type=request-info", (response) => {
         // 加载用户基本数据
         response = JSON.parse(response);
-        if (response.needrelogin) {
-            alert("该账号已在其他地方登录，点击“确定”重新登录，新的登录IP：" + response.userinfo.lastloginIP)
-            document.cookie = "KivoText-loginID=; max-age=Thu, 01 Jan 1970 00:00:00 GMT";
-            location.reload();
-            return;
-        }
         for (const each of document.getElementsByClassName("user-name-label")) {
             each.innerText = response.userinfo.name;
         };

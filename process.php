@@ -80,7 +80,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 echo "login.error.doesNotExistOrPasswordWrong";
             } else {
                 mysqli_query($con, "UPDATE `users` SET `lastonlinetime` = CURRENT_TIMESTAMP() WHERE `id` = " . $res["id"]);
-                mysqli_query($con, "UPDATE `users` SET `lastloginIP` = '" . getRemoteIP() . "' WHERE `id` = " . $res["id"]);
                 if ($_REQUEST["keeplogined"] == "true") {
                     setcookie("KivoText-loginID", $res["id"], time() + 60 * 60 * 24 * 7);
                 } else {
@@ -98,8 +97,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 $resultArr[$key] = array_merge($resultArr[$key], mysqli_fetch_assoc(mysqli_query($con, "SELECT * FROM `sharedinfo` WHERE `fileid` = " . $value["id"])));
             }
             echo "result:", json_encode([
-                "userinfo" => $queryArr2,
-                "needrelogin" => $queryArr2["lastloginIP"] != getRemoteIP(),
+                "userinfo" => $queryArr2
                 "constants" => [
                     "fileNameLimitLength" => 20,
                     "shareCodeLength" =>  constant('share-code-A-part-length') + constant('share-code-B-part-length'),
