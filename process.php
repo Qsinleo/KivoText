@@ -51,7 +51,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         foreach (mysqli_fetch_all(mysqli_query($con, "SELECT * FROM `readsharedfilelog` WHERE `userid` = " . $_REQUEST["id"] . " AND `fileid` = " . $_REQUEST["fileid"]), MYSQLI_ASSOC) as $value) {
             array_push($readerlist, array_merge(mysqli_fetch_assoc(mysqli_query($con, "SELECT * FROM `users` WHERE `id` = " . $value["userid"])), ["readtime" => $value["readtime"]]));
         }
-        return ["readers" => $readerlist];
+        return $readerlist;
     }
     switch ($_REQUEST["type"]) {
         case "ping-back":
@@ -125,9 +125,18 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             mysqli_query($con, "DELETE FROM `users` WHERE `id` = " . $_REQUEST["id"]);
             echo "deleteAccount.success";
             break;
-        case "open-file":
+        case "read-file":
             echo "result:";
-            echo json_encode(array_merge(mysqli_fetch_assoc(mysqli_query($con, "SELECT `id`,`name`,`ownerid`,CONVERT(DES_DECRYPT(`content`,'" . constant("encrypt-key") . "') USING utf8mb4) AS `content`,`lastmodifiedtime` FROM `files` WHERE id = " . $_REQUEST["fileid"])), mysqli_fetch_assoc(mysqli_query($con, "SELECT * FROM `sharedinfo` WHERE `fileid` = " . $_REQUEST["fileid"])), getReadersList()));
+            echo json_encode([
+                "fileinfo" =>
+                mysqli_fetch_assoc(mysqli_query(
+                    $con,
+                    "SELECT `id`,`name`,CONVERT(DES_DECRYPT(`content`,'" . mysqli_escape_string($con, constant("encrypt-key")) . "') USING utf8mb4) AS `content`,`lastmodifiedtime` FROM `files` WHERE id = " . $_REQUEST["fileid"]
+                )),
+                "shareinfo" =>
+                mysqli_fetch_assoc(mysqli_query($con, "SELECT * FROM `sharedinfo` WHERE `fileid` = " . $_REQUEST["fileid"])),
+                "sharedfilereadinfo" => getReadersList()
+            ]);
             break;
         case "save-file":
             function isDataDuplicate($content)
@@ -142,7 +151,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             if (!isDataDuplicate($_REQUEST["filecontent"])) {
                 generateNewShareCode($_REQUEST["fileid"]);
             }
-            mysqli_query($con, "UPDATE `files` SET `lastmodifiedtime` = CURRENT_TIMESTAMP() , `content` = DES_ENCRYPT('" . mysqli_escape_string($con, urldecode($_REQUEST["filecontent"])) . "','" . constant("encrypt-key") . "') WHERE `id` = " . $_REQUEST["fileid"]);
+            mysqli_query($con, "UPDATE `files` SET `lastmodifiedtime` = CURRENT_TIMESTAMP() , `content` = DES_ENCRYPT('" . mysqli_escape_string($con, urldecode($_REQUEST["filecontent"])) . "','" . mysqli_escape_string($con, constant("encrypt-key")) . "') WHERE `id` = " . $_REQUEST["fileid"]);
             echo "savefile.success";
             break;
         case "rename-file":
@@ -155,6 +164,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             echo "createFile.success";
             break;
         case "delete-file":
+            mysqli_query($con, "DELETE FROM `readsharedfilelog` WHERE `fileid` = " . $_REQUEST["fileid"]);
             mysqli_query($con, "DELETE FROM `files` WHERE `id` = " . $_REQUEST["fileid"]);
             echo "deleteFile.success";
             break;
@@ -172,15 +182,12 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             echo "copyFile.success";
             break;
         case "upload-file":
-            mysqli_query($con, "INSERT INTO `files` VALUES (NULL,'" . mysqli_escape_string($con, urldecode($_REQUEST["filename"])) . "'," . $_REQUEST["id"] . ",DES_ENCRYPT('" . mysqli_escape_string($con, urldecode($_REQUEST["filecontent"])) . "','" . constant("encrypt-key") . "'),CURRENT_TIMESTAMP())");
+            mysqli_query($con, "INSERT INTO `files` VALUES (NULL,'" . mysqli_escape_string($con, urldecode($_REQUEST["filename"])) . "'," . $_REQUEST["id"] . ",DES_ENCRYPT('" . mysqli_escape_string($con, urldecode($_REQUEST["filecontent"])) . "','" . mysqli_escape_string($con, constant("encrypt-key")) . "'),CURRENT_TIMESTAMP())");
             createSharedRecord(mysqli_insert_id($con));
             echo "uploadFile.success";
             break;
         case "change-shared-status":
             mysqli_query($con, "UPDATE `sharedinfo` SET avaliable = " . ($_REQUEST["method"] == "on" ? "1" : "0") . " WHERE fileid = " . $_REQUEST["fileid"]);
-        case "request-shared-status":     //switch代码特有的方式，勿删
-            echo "result:";
-            echo json_encode(array_merge(mysqli_fetch_assoc(mysqli_query($con, "SELECT * FROM `sharedinfo` WHERE `fileid` = " . $_REQUEST["fileid"])), getReadersList()));
             break;
         case "open-shared-file":
             echo "result:";
@@ -191,7 +198,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 if ($queryArr1["avaliable"] == 0) {
                     echo "openSharedFile.error.shareCodeErrorOrShareIsClosed";
                 } else {
-                    $queryArr2 = mysqli_fetch_assoc(mysqli_query($con, "SELECT `id`,`name`,`ownerid`,CONVERT(DES_DECRYPT(`content`,'" . constant("encrypt-key") . "') USING utf8mb4) AS `content`,`lastmodifiedtime` FROM `files` WHERE `id` = " . $queryArr1["fileid"]));
+                    $queryArr2 = mysqli_fetch_assoc(mysqli_query($con, "SELECT `id`,`name`,`ownerid`,CONVERT(DES_DECRYPT(`content`,'" . mysqli_escape_string($con, constant("encrypt-key")) . "') USING utf8mb4) AS `content`,`lastmodifiedtime` FROM `files` WHERE `id` = " . $queryArr1["fileid"]));
                     if ($queryArr2) {
                         if (mysqli_num_rows(mysqli_query($con, "SELECT * FROM `readsharedfilelog` WHERE `fileid` = " . $queryArr1["fileid"] . " AND `userid` = " . $_REQUEST["id"])) == 0) {
                             // 未打开过

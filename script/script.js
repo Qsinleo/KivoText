@@ -24,18 +24,6 @@ function getFileStatus(flag) {
     }
 }
 
-function showFileStatus(avaliable) {
-    if (avaliable == 1) {
-        document.getElementById("file-editable-label").innerText = "只读模式(共享文件)";
-        document.getElementById("file-editable-label").className = "yellow-text";
-    } else if (fileLengthLimit < 0) {
-        document.getElementById("file-editable-label").innerText = "只读模式(账号限制)";
-        document.getElementById("file-editable-label").className = "yellow-text";
-    } else {
-        document.getElementById("file-editable-label").innerText = "-";
-        document.getElementById("file-editable-label").className = "green-text";
-    }
-}
 
 
 function operationOfFiles(type, fileid) {
@@ -66,55 +54,7 @@ function operationOfFiles(type, fileid) {
             document.getElementById("file-not-open-hint").style.removeProperty("font-style")
             document.getElementById("file-not-open-hint").style.fontWeight = "bold";
             document.getElementById("file-not-open-hint").innerText = "正在打开文件" + fileInfoFormatter() + "……";
-        case "refresh-file":
-            loadingAnimation(true);
-            sendRequest("type=open-file&fileid=" + fileid, (response) => {
-                loadingAnimation(false);
-                for (const each of document.getElementsByClassName("file-label")) {
-                    if (each.getAttribute("fileID") == fileid) {
-                        each.style.backgroundColor = "var(--high-light-color)";
-                        each.getElementsByClassName("open-file-button")[0].disabled = "disabled";
-                    } else {
-                        each.style.removeProperty("background-color");
-                        each.getElementsByClassName("open-file-button")[0].disabled = "";
-                    }
-                }
-                document.getElementById("close-file-button").onclick = () => {
-                    operationOfFiles("close-file", fileid);
-                };
-                document.getElementById("save-file-button").onclick = () => {
-                    operationOfFiles("save-file", fileid);
-                };
-                document.getElementById("rename-file-button-inedit").onclick = () => {
-                    operationOfFiles("rename-file", fileid);
-                };
-                document.getElementById("restore-file-button-inedit").onclick = () => {
-                    operationOfFiles("restore-file", fileid);
-                };
-                document.getElementById("delete-file-button-inedit").onclick = () => {
-                    operationOfFiles("delete-file", fileid);
-                };
-                document.getElementById("download-file-button-inedit").onclick = () => {
-                    operationOfFiles("download-file", fileid);
-                };
-                document.getElementById("copy-file-button-inedit").onclick = () => {
-                    operationOfFiles("copy-file", fileid);
-                };
-                document.getElementById("file-not-open-hint").style.display = "none";
-                document.getElementById("file-opened-area").style.display = "block";
-                let fileObj = JSON.parse(response);
-                document.getElementById("file-info").getElementsByTagName("span")[0].innerText = fileObj.name;
-                document.getElementById("file-info").getElementsByTagName("span")[1].innerText = fileObj.id;
-                document.getElementById("file-info").getElementsByTagName("span")[2].innerText = fileObj.lastmodifiedtime;
-                document.getElementById("close-file-button").disabled = "";
-                document.getElementById("file-save-status-label").innerText = "所有更改已经保存";
-                document.getElementById("file-save-status-label").className = "green-text";
-                document.getElementById("main-text-editor").value = fileObj.content;
-                originText = fileObj.content;
-                displayShareInfo(fileObj);
-                textStatic();
-                searchText();
-            });
+            loadFileMeta(null, true, fileid);
             break;
         case "save-file":
             if (getFileStatus("is-shared")) {
@@ -129,14 +69,10 @@ function operationOfFiles(type, fileid) {
 
             loadingAnimation(true);
             sendRequest("type=save-file&fileid=" + fileid + "&filecontent=" + encodeURIComponent(document.getElementById("main-text-editor").value), (response) => {
-                sendRequest("type=request-shared-status&fileid=" + fileid, (response1) => {
-                    showMessage("保存文件成功！")
-                    loadingAnimation(false);
-                    operationOfFiles("refresh-file", fileid);
-                    document.getElementById("file-save-status-label").innerText = "所有更改已经保存";
-                    document.getElementById("file-save-status-label").className = "green-text";
-                }, true); //刷新共享状态
-            }, false);
+                showMessage("保存文件成功！")
+                loadingAnimation(false);
+                loadFileMeta(null, true, fileid);
+            }, false); //刷新共享状态;
             break;
         case "close-file":
             if (!getFileStatus("is-saved")) {
@@ -185,7 +121,6 @@ function operationOfFiles(type, fileid) {
             if (!confirm("是否恢复到上次保存的内容？")) {
                 break;
             }
-
             document.getElementById("main-text-editor").value = originText;
             document.getElementById("file-save-status-label").innerText = "所有更改已经保存";
             document.getElementById("file-save-status-label").className = "green-text";
@@ -299,7 +234,7 @@ function operationOfFiles(type, fileid) {
                 document.getElementById("request-shared-file-status-label").className = "red";
                 break;
             }
-            if (obj.judge()) {
+            if (!obj.judge()) {
                 document.getElementById("request-shared-file-status-label").innerText = "验证码错误";
                 document.getElementById("request-shared-file-status-label").className = "red";
                 break;
@@ -379,34 +314,6 @@ function operationOfFiles(type, fileid) {
         default:
             break;
     }
-}
-
-function displayShareInfo(data) {
-    if (data.avaliable == 1) {
-        document.getElementById("switch-share-status-button").innerText = "关闭共享";
-        document.getElementById("shared-status").innerText = "已共享";
-        document.getElementById("shared-status").className = "green";
-    } else {
-        document.getElementById("switch-share-status-button").innerText = "开启共享";
-        document.getElementById("shared-status").innerText = "未共享";
-        document.getElementById("shared-status").className = "red";
-    }
-    document.getElementById("share-code-label").innerText = data.sharecode;
-    document.getElementById("shared-file-visited-times-label").innerText = data.readers.length;
-    document.getElementById("has-read-shared-file-list").innerHTML = "";
-    if (data.readers.length) {
-        for (const each of data.readers) {
-            const listobj = document.createElement("div");
-            listobj.innerHTML = "<b>" + each.name + "</b> <small>ID:" + each.id + "</small> <small>" + each.readtime + "</small>";
-            document.getElementById("has-read-shared-file-list").appendChild(listobj);
-        }
-    } else {
-        const listobj = document.createElement("div");
-        listobj.innerHTML = "<i>暂时无人观看</i>";
-        document.getElementById("has-read-shared-file-list").appendChild(listobj);
-    }
-
-    showFileStatus(data.avaliable);
 }
 
 function displaySelectInfo() {
@@ -524,12 +431,114 @@ function loadUserInfo(callback = {}) {
         loadingAnimation(false);
         if (typeof callback == "function") {
             callback();
-        } else {
-            throw new Error("执行的不是函数！");
         }
     }, true);
 }
 
+function loadFileMeta(callback = {}, changeTextarea = false, fileid = document.getElementById("file-info").getElementsByTagName("span")[1].innerText) {
+    function dateDiffWithinNDays(date1, date2, n) {
+        const diffTime = Math.abs(date2 - date1);
+        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)); // 计算天数差
+        return diffDays <= n;
+    }
+    loadingAnimation(true);
+    sendRequest("type=read-file&fileid=" + fileid, (response) => {
+        loadingAnimation(false);
+        for (const each of document.getElementsByClassName("file-label")) {
+            if (each.getAttribute("fileID") == fileid) {
+                each.style.backgroundColor = "var(--high-light-color)";
+                each.getElementsByClassName("open-file-button")[0].disabled = "disabled";
+            } else {
+                each.style.removeProperty("background-color");
+                each.getElementsByClassName("open-file-button")[0].disabled = "";
+            }
+        }
+        document.getElementById("close-file-button").onclick = () => {
+            operationOfFiles("close-file", fileid);
+        };
+        document.getElementById("save-file-button").onclick = () => {
+            operationOfFiles("save-file", fileid);
+        };
+        document.getElementById("rename-file-button-inedit").onclick = () => {
+            operationOfFiles("rename-file", fileid);
+        };
+        document.getElementById("restore-file-button-inedit").onclick = () => {
+            operationOfFiles("restore-file", fileid);
+        };
+        document.getElementById("delete-file-button-inedit").onclick = () => {
+            operationOfFiles("delete-file", fileid);
+        };
+        document.getElementById("download-file-button-inedit").onclick = () => {
+            operationOfFiles("download-file", fileid);
+        };
+        document.getElementById("copy-file-button-inedit").onclick = () => {
+            operationOfFiles("copy-file", fileid);
+        };
+        document.getElementById("file-not-open-hint").style.display = "none";
+        document.getElementById("file-opened-area").style.display = "block";
+        let fileObj = JSON.parse(response);
+        document.getElementById("file-info").getElementsByTagName("span")[0].innerText = fileObj.fileinfo.name;
+        document.getElementById("file-info").getElementsByTagName("span")[1].innerText = fileObj.fileinfo.id;
+        document.getElementById("file-info").getElementsByTagName("span")[2].innerText = fileObj.fileinfo.lastmodifiedtime;
+        document.getElementById("close-file-button").disabled = "";
+        if (changeTextarea) {
+            document.getElementById("file-save-status-label").innerText = "所有更改已经保存";
+            document.getElementById("file-save-status-label").className = "green-text";
+            document.getElementById("main-text-editor").value = fileObj.fileinfo.content;
+        }
+        originText = fileObj.fileinfo.content;
+        if (fileObj.shareinfo.avaliable == 1) {
+            document.getElementById("switch-share-status-button").innerText = "关闭共享";
+            document.getElementById("shared-status").innerText = "已共享";
+            document.getElementById("shared-status").className = "green";
+        } else {
+            document.getElementById("switch-share-status-button").innerText = "开启共享";
+            document.getElementById("shared-status").innerText = "未共享";
+            document.getElementById("shared-status").className = "red";
+        }
+        // 共享信息
+        document.getElementById("share-code-label").innerText = fileObj.shareinfo.sharecode;
+        document.getElementById("shared-file-visited-times-label").innerText = fileObj.sharedfilereadinfo.length;
+        document.getElementById("has-read-shared-file-list").innerHTML = "";
+
+        if (fileObj.sharedfilereadinfo.length) {
+            let existOneRead = false;
+            for (const each of fileObj.sharedfilereadinfo) {
+                if (document.getElementById("read-list-time-filter").value != "all") {
+                    if (!dateDiffWithinNDays(new Date(), new Date(each.readtime), parseInt(document.getElementById("read-list-time-filter").value))) {
+                        continue;
+                    } else {
+                        existOneRead = true;
+                    }
+                }
+                const listobj = document.createElement("div");
+                listobj.innerHTML = "<b>" + each.name + "</b><br><small>ID:" + each.id + "</small> <small>" + each.readtime + "</small>";
+                document.getElementById("has-read-shared-file-list").appendChild(listobj);
+            }
+            if (!existOneRead && document.getElementById("read-list-time-filter").value != "all") {
+                document.getElementById("has-read-shared-file-list").innerHTML = "<i>筛选的时间内暂时无人观看</i>";
+            }
+        } else {
+            document.getElementById("has-read-shared-file-list").innerHTML = "<i>暂时无人观看</i>";
+        }
+        if (fileObj.shareinfo.avaliable == 1) {
+            document.getElementById("file-editable-label").innerText = "只读模式(共享文件)";
+            document.getElementById("file-editable-label").className = "yellow-text";
+        } else if (fileLengthLimit < 0) {
+            document.getElementById("file-editable-label").innerText = "只读模式(账号限制)";
+            document.getElementById("file-editable-label").className = "yellow-text";
+        } else {
+            document.getElementById("file-editable-label").innerText = "-";
+            document.getElementById("file-editable-label").className = "green-text";
+        }
+        textStatic();
+        searchText();
+        if (typeof callback == "function") {
+            callback();
+        }
+    }, true);
+
+}
 
 document.getElementById("now-loading-content").innerText = "样式和字体文件";
 

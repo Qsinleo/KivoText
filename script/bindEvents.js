@@ -436,8 +436,9 @@ function bindEvents(logined) {
                 loadingAnimation(true);
                 sendRequest("type=change-shared-status&method=" + (document.getElementById("shared-status").className == "green" ? "off" : "on") + "&fileid=" + document.getElementById("file-info").getElementsByTagName("span")[1].innerText, (response1) => {
                     loadUserInfo(() => {
-                        showMessage("切换共享状态成功！");
-                        displayShareInfo(JSON.parse(response1));
+                        loadFileMeta(() => {
+                            showMessage("切换共享状态成功！");
+                        })
                     });
                 }, true);
             });
@@ -448,14 +449,17 @@ function bindEvents(logined) {
             });
             document.getElementById("refresh-share-info-button").addEventListener("click", () => {
                 loadingAnimation(true);
-                sendRequest("type=request-shared-status&fileid=" + document.getElementById("file-info").getElementsByTagName("span")[1].innerText, (response1) => {
-                    sendRequest("type=request-files", (response2) => {
-                        loadUserInfo(response2);
-                        showMessage("刷新共享状态成功！");
-                        displayShareInfo(JSON.parse(response1));
-                    }, true);
+                sendRequest("type=read-file&fileid=" + document.getElementById("file-info").getElementsByTagName("span")[1].innerText, (response1) => {
+                    loadUserInfo(() => {
+                        loadFileMeta(() => {
+                            showMessage("刷新共享状态成功！");
+                        })
+                    });
                 }, true);
             });
+            document.getElementById("read-list-time-filter").addEventListener("change", () => {
+                loadFileMeta()
+            })
         }//共享状态切换
 
         {

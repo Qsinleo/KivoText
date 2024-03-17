@@ -67,7 +67,7 @@
 						<small>本功能建议经常使用，以防隐私泄露。</small>
 						<div class="seperator">危险区域</div>
 						<div>
-							<button id="delete-account-link" class="red">注销账号</button>
+							<button id="delete-account-link" class="red-text">注销账号</button>
 						</div>
 					</div>
 					<div class="pop-content" type="upload-files">
@@ -95,7 +95,8 @@
 									id="upload-files-input" /><small>提示：每一次选择都会在下方列表新增文件，允许多个文件。</small>
 							</div>
 						</div>
-						<div class="seperator">已上传的文件操作<button class="red" id="reset-uploaded-files-button">重置</button>
+						<div class="seperator">已上传的文件操作<button class="red-text"
+								id="reset-uploaded-files-button">重置</button>
 						</div>
 						<div id="uploaded-files-list"><i>没有上传的文件。</i></div>
 						<div id="process-uploaded-files" class="center"><button class="green">上传</button>
@@ -279,10 +280,10 @@
 								<button id="reversedly-select-all-file-button">反向选择</button>
 							</div>
 							<div id="files-operator-list">
-								<button class="blue file-operator-button" id="rename-file-button">重命名</button>
-								<button class="green file-operator-button" id="download-file-button">下载</button>
-								<button class="yellow file-operator-button" id="copy-file-button">另存为</button>
-								<button class="red file-operator-button" id="delete-file-button">删除</button>
+								<button class="file-operator-button" id="rename-file-button">重命名</button>
+								<button class="file-operator-button" id="download-file-button">下载</button>
+								<button class="file-operator-button" id="copy-file-button">另存为</button>
+								<button class="red-text file-operator-button" id="delete-file-button">删除</button>
 								<label><input type="checkbox" id="multi-operation-no-ask-again" />一次性完成操作</label>
 							</div>
 
@@ -312,17 +313,20 @@
 								<span></span>
 							</div>
 							<div id="file-operator" class="center">
-								<button class="red" id="close-file-button">关闭文件</button>
-								<button class="blue" id="save-file-button">保存</button>
+								<button class="red-text" id="close-file-button">关闭文件</button>
+								<button id="save-file-button">保存</button>
 								<small id="file-save-status-label"></small>
 								<b><small id="file-editable-label">只读模式</small></b>
 								<details>
 									<summary>更多</summary>
-									<button class="yellow" id="copy-file-button-inedit">另存为</button>
-									<button class="green" id="download-file-button-inedit">下载</button>
-									<button class="blue" id="rename-file-button-inedit">重命名</button>
-									<button class="yellow" id="restore-file-button-inedit">恢复</button>
-									<button class="red" id="delete-file-button-inedit">删除</button>
+									<div>
+										<button id="copy-file-button-inedit">另存为</button>
+										<button id="download-file-button-inedit">下载</button>
+										<button id="rename-file-button-inedit">重命名</button>
+										<button id="restore-file-button-inedit">恢复</button>
+										<button class="red-text" id="delete-file-button-inedit">删除</button>
+									</div>
+
 								</details>
 								<select>
 									<option value="12">12px</option>
@@ -388,6 +392,15 @@
 										</table>
 										<details class="center">
 											<summary><small>已阅览人名单</small></summary>
+											<div>
+												查看<select id="read-list-time-filter">
+													<option value="all" selected>全部</option>
+													<option value="1">24小时内</option>
+													<option value="7">一周内</option>
+													<option value="31">一月内</option>
+													<option value="365">一年内</option>
+												</select>
+											</div>
 											<div id="has-read-shared-file-list" class="center">
 
 											</div>
