@@ -111,7 +111,6 @@ function operationOfFiles(type, fileid) {
                                     each.style.backgroundColor = "var(--high-light-color)";
                                 }
                             }
-                            showMessage("重命名文件成功");
                         });
                     }, false);
                 }
@@ -162,7 +161,6 @@ function operationOfFiles(type, fileid) {
                     if (fileid == document.getElementById("file-info").getElementsByTagName("span")[1].innerText) {
                         operationOfFiles("close-file", fileid);
                     }
-                    showMessage("删除文件成功！");
                     displaySelectInfo();
                 });
             }, false);
@@ -185,26 +183,18 @@ function operationOfFiles(type, fileid) {
                 saveFlag = false;
             }
             loadingAnimation(true);
-            if (saveFlag) {
-                downloadFile(document.getElementById("main-text-editor").value, JSON.parse(response)["name"] + ".txt");
-            } else {
-                sendRequest("type=open-file&fileid=" + fileid, (response) => {
-                    downloadFile(JSON.parse(response)["content"], JSON.parse(response)["name"] + ".txt");
-                    loadingAnimation(false);
-                }, true);
-            }
+            sendRequest("type=read-file&fileid=" + fileid, (response) => {
+                if (saveFlag) {
+                    downloadFile(document.getElementById("main-text-editor").value, JSON.parse(response).fileinfo.name + ".txt");
+                } else {
+                    downloadFile(JSON.parse(response).fileinfo.content, JSON.parse(response).fileinfo.name + ".txt");
+                } loadingAnimation(false);
+            }, true);
             break;
         case "copy-file":
             if (fileLengthLimit != null) {
                 if (textStatic()[0] > fileLengthLimit) {
                     showMessage("另存为失败：当前文件内容长度超出了限制！可在“权限查看”页面确认权限。");
-                    break;
-                }
-            }
-
-            if (filesCountLimit != null) {
-                if (parseInt(document.getElementById("total-files-label").innerText) >= filesCountLimit) {
-                    showMessage("创建文件失败：文件数量超出限制！");
                     break;
                 }
             }
@@ -222,9 +212,7 @@ function operationOfFiles(type, fileid) {
             } else {
                 loadingAnimation(true);
                 sendRequest("type=copy-file&newname=" + encodeURIComponent(askName) + "&fileid=" + fileid, (response) => {
-                    loadUserInfo(() => {
-                        showMessage("另存文件成功");
-                    });
+                    loadUserInfo();
                 }, false);
             }
             break;
@@ -336,6 +324,11 @@ function loadUserInfo(callback = {}) {
     sendRequest("type=request-info", (response) => {
         // 加载用户基本数据
         response = JSON.parse(response);
+        if (response.needrelogin) {
+            document.cookie = "KivoText-loginID=; max-age=Thu, 01 Jan 1970 00:00:00 GMT";
+            alert("账号已在其他地方登录，点击“确定”重新登录.\n新的登录IP:" + response.userinfo.lastloginIP + "，如非你的操作，则可能已被盗号。")
+            location.reload();
+        }
         for (const each of document.getElementsByClassName("user-name-label")) {
             each.innerText = response.userinfo.name;
         };

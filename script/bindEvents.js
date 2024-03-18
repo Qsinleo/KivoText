@@ -562,8 +562,13 @@ function bindEvents(logined) {
 
             document.getElementById("copy-file-button").addEventListener("click", () => {
                 if (getAllSelctedID()) {
-                    for (const each of getAllSelctedID()) {
-                        operationOfFiles("copy-file", each);
+                    if (filesCountLimit === null || getAllSelctedID() + parseInt(document.getElementById("total-files-label")) <= filesCountLimit) {
+                        for (const each of getAllSelctedID()) {
+                            operationOfFiles("copy-file", each);
+                        }
+                        showMessage("另存为文件成功");
+                    } else {
+                        showMessage("另存为文件失败：文件数量超出限制！");
                     }
                 }
             });
@@ -577,12 +582,14 @@ function bindEvents(logined) {
                             for (const each of getAllSelctedID()) {
                                 operationOfFiles("delete-file-force", each);
                             }
+                            showMessage("删除文件成功");
                         }
 
                     } else if (getAllSelctedID()) {
                         for (const each of getAllSelctedID()) {
                             operationOfFiles("delete-file", each);
                         }
+                        showMessage("删除文件成功");
                     }
                 }
 

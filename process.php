@@ -61,7 +61,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             if (mysqli_num_rows(mysqli_query($con, "SELECT * FROM `users` WHERE `name` = '" . $_REQUEST["name"] . "'")) > 0) {
                 echo "register.error.alreadyExists";
             } else {
-                mysqli_query($con, "INSERT INTO `users` VALUES (NULL,'" . mysqli_escape_string($con, $_REQUEST["name"]) . "','" . $_REQUEST["passwordENC"] . "',CURRENT_TIMESTAMP())");
+                mysqli_query($con, "INSERT INTO `users` VALUES (NULL,'" . mysqli_escape_string($con, $_REQUEST["name"]) . "','" . $_REQUEST["passwordENC"] . "',CURRENT_TIMESTAMP(),'" . getRemoteIP() . "')");
                 $addid = mysqli_insert_id($con);
                 mysqli_query($con, "INSERT INTO `accessinfo` VALUES (" . $addid . "," . constant('default-file-length-limit') . "," . constant('default-files-count-limit') . "),1");
                 if ($_REQUEST["keeplogined"] == "true") {
@@ -80,6 +80,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 echo "login.error.doesNotExistOrPasswordWrong";
             } else {
                 mysqli_query($con, "UPDATE `users` SET `lastonlinetime` = CURRENT_TIMESTAMP() WHERE `id` = " . $res["id"]);
+                mysqli_query($con, "UPDATE `users` SET `lastloginIP` = '" . getRemoteIP() . "' WHERE `id` = " . $_REQUEST["id"]);
                 if ($_REQUEST["keeplogined"] == "true") {
                     setcookie("KivoText-loginID", $res["id"], time() + 60 * 60 * 24 * 7);
                 } else {
@@ -90,14 +91,15 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             break;
         case "request-info":
             mysqli_query($con, "UPDATE `users` SET `lastonlinetime` = CURRENT_TIMESTAMP() WHERE `id` = " . $_REQUEST["id"]);
-            $queryArr = mysqli_fetch_assoc(mysqli_query($con, "SELECT * FROM `accessinfo` WHERE id = " . $_REQUEST["id"]));
-            $queryArr2 = mysqli_fetch_assoc(mysqli_query($con, "SELECT * FROM `users` WHERE id = " . $_REQUEST["id"]));
+            $queryArr = mysqli_fetch_assoc(mysqli_query($con, "SELECT * FROM `accessinfo` WHERE `id` = " . $_REQUEST["id"]));
+            $queryArr2 = mysqli_fetch_assoc(mysqli_query($con, "SELECT * FROM `users` WHERE `id` = " . $_REQUEST["id"]));
             $resultArr = mysqli_fetch_all(mysqli_query($con, "SELECT `id`,`name`,`lastmodifiedtime`,`ownerid` FROM `files` WHERE ownerid = " . $_REQUEST["id"]), MYSQLI_ASSOC);
             foreach ($resultArr as $key => $value) {
                 $resultArr[$key] = array_merge($resultArr[$key], mysqli_fetch_assoc(mysqli_query($con, "SELECT * FROM `sharedinfo` WHERE `fileid` = " . $value["id"])));
             }
             echo "result:", json_encode([
-                "userinfo" => $queryArr2
+                "userinfo" => $queryArr2,
+                "needrelogin" => $queryArr2["lastloginIP"] != getRemoteIP(),
                 "constants" => [
                     "fileNameLimitLength" => 20,
                     "shareCodeLength" =>  constant('share-code-A-part-length') + constant('share-code-B-part-length'),
