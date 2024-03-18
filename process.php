@@ -63,7 +63,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             } else {
                 mysqli_query($con, "INSERT INTO `users` VALUES (NULL,'" . mysqli_escape_string($con, $_REQUEST["name"]) . "','" . $_REQUEST["passwordENC"] . "',CURRENT_TIMESTAMP(),'" . getRemoteIP() . "')");
                 $addid = mysqli_insert_id($con);
-                mysqli_query($con, "INSERT INTO `accessinfo` VALUES (" . $addid . "," . constant('default-file-length-limit') . "," . constant('default-files-count-limit') . "),1");
+                mysqli_query($con, "INSERT INTO `accessinfo` VALUES (" . $addid . "," . constant('default-file-length-limit') . "," . constant('default-files-count-limit') . ",1)");
                 if ($_REQUEST["keeplogined"] == "true") {
                     setcookie("KivoText-loginID", $addid, time() + 60 * 60 * 24 * 7);
                 } else {
@@ -80,7 +80,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 echo "login.error.doesNotExistOrPasswordWrong";
             } else {
                 mysqli_query($con, "UPDATE `users` SET `lastonlinetime` = CURRENT_TIMESTAMP() WHERE `id` = " . $res["id"]);
-                mysqli_query($con, "UPDATE `users` SET `lastloginIP` = '" . getRemoteIP() . "' WHERE `id` = " . $_REQUEST["id"]);
+                mysqli_query($con, "UPDATE `users` SET `lastloginIP` = '" . getRemoteIP() . "' WHERE `id` = " . $res["id"]);
                 if ($_REQUEST["keeplogined"] == "true") {
                     setcookie("KivoText-loginID", $res["id"], time() + 60 * 60 * 24 * 7);
                 } else {

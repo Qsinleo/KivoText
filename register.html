@@ -198,7 +198,8 @@
                                 document.getElementById("name-error").innerText = "用户名已存在！";
                                 break;
                             case "register.success":
-                                alert("注册成功，点击“确定”返回主界面。")
+                                alert("注册成功，点击“确定”返回主界面。");
+                                document.body.getElementsByTagName("main")[0].innerHTML = "<h2>正在跳转中……</h2>";
                                 location.href = "index.html";
                             default:
                                 break;
