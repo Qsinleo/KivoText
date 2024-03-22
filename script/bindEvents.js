@@ -471,13 +471,6 @@ function bindEvents(logined) {
                 document.getElementById("request-shared-file-status-label").innerText = "等待共享码";
                 document.getElementById("request-shared-file-status-label").className = "";
             });
-            document.getElementById("shared-file-is-auto-wrapped").addEventListener("change", () => {
-                if (document.getElementById("shared-file-is-auto-wrapped").checked) {
-                    document.getElementById("shared-file-text-editor").style.whiteSpace = "normal";
-                } else {
-                    document.getElementById("shared-file-text-editor").style.whiteSpace = "nowrap";
-                }
-            });
             document.getElementById("share-code-input").placeholder = "长度为" + shareCodeLength + "，不区分大小写";
             document.getElementById("close-shared-file-button").addEventListener("click", () => {
                 operationOfFiles("close-shared-file", null);

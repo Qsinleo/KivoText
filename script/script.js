@@ -245,6 +245,7 @@ function operationOfFiles(type, fileid) {
                     document.getElementById("shared-file-info").getElementsByTagName("span")[3].innerText = result.ownername;
                     document.getElementById("shared-file-info").getElementsByTagName("span")[4].innerText = result.readtimes;
                     document.getElementById("shared-file-text-editor").value = result.content;
+                    console.log(result.content)
                     document.getElementById("shared-file-text-editor").disabled = "";
                     for (const each of document.getElementById("shared-file-operator").getElementsByTagName("button")) {
                         each.disabled = "";

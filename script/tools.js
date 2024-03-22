@@ -113,6 +113,7 @@ function sendRequest(args, callback, result = true) {
     xmlhttp.onreadystatechange = function () {
         if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
             if (typeof callback == "function") {
+                // console.log(xmlhttp.responseText);
                 if (result) {
                     callback(xmlhttp.responseText.slice(7));
                 } else {

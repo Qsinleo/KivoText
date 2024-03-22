@@ -520,7 +520,6 @@ footer .right button {
 #shared-file-text-editor {
     resize: none;
     overflow: auto;
-    white-space: normal;
     margin-top: 10px;
     width: 100%;
     box-sizing: border-box;
