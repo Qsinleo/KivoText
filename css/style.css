@@ -1,28 +1,3 @@
-:root {
-    /* 配色方案 */
-    --light-bg: rgb(247, 233, 209);
-    --medium-bg: rgb(243, 222, 165);
-    --yellow-color: yellow;
-    --light-blue-color: rgb(187, 255, 255);
-    --blue-color: cyan;
-    --dark-blue-color: blue;
-    --orange-color: rgb(255, 102, 0);
-    --light-red-color: rgb(252, 218, 218);
-    --light-green-color: rgb(200, 255, 200);
-    --light-yellow-color: rgb(255, 223, 164);
-    --high-light-color: #ebff66;
-    --green-color: green;
-    --red-color: red;
-    --loading-bg-color-1: #ffdada;
-    --loading-bg-color-2: #fffdc1;
-    --disabled-bg: rgb(224, 224, 224);
-    --disabled-color: #9e9e9e;
-    --default-btn-color: initial;
-    --default-btn-bg: white;
-    --button-hover-color: rgb(227, 249, 250);
-    --button-active-color: rgb(206, 222, 253);
-}
-
 main {
     box-sizing: border-box;
     width: 95%;
@@ -40,56 +15,7 @@ main {
     font-family: "MiSans";
     font-weight: 300;
     overflow: auto;
-    border: 1px solid;
-}
-
-a {
-    text-decoration: none;
-    background-color: var(--medium-bg);
-    padding: 3px;
-    border-radius: 3px;
-    color: var(--dark-blue-color);
-    transition-duration: .3s;
-}
-
-a:hover {
-    color: var(--green-color);
-}
-
-button {
-    color: var(--default-btn-color);
-    background-color: var(--default-btn-bg);
-    font-family: initial;
-    border: none;
-    border-bottom: 1px solid black;
-    padding: 3px;
-    margin-left: 3px;
-    margin-right: 3px;
-    transition-duration: .2s;
-    border-radius: 3px;
-}
-
-button:hover {
-    background-color: var(--button-hover-color);
-}
-
-button:active {
-    background-color: var(--button-active-color);
-}
-
-button:disabled {
-    color: var(--disabled-color);
-    background-color: var(--disabled-bg);
-}
-
-header {
-    font-size: x-large;
-    font-weight: bold;
-    margin-bottom: 10px;
-}
-
-input[type=text] {
-    width: 150px;
+    border-bottom: 2px solid gray;
 }
 
 footer {
@@ -187,7 +113,8 @@ footer .right button {
 #need-login {
     margin: 10px;
     padding: 20px;
-    background-color: var(--yellow-color);
+    border-radius: 10px;
+    border: 5px var(--yellow-color) dashed;
 }
 
 #need-login p * {
@@ -557,21 +484,33 @@ footer .right button {
 }
 
 .message-display {
+    margin: 5px;
+    background-color: rgba(255, 255, 255);
     position: fixed;
     height: fit-content;
-    padding: 10px;
-    border-radius: 10px;
+    padding: 8px;
+    border-radius: 8px;
     width: fit-content;
-    left: 10px;
-    background-color: var(--light-blue-color);
-    top: 10px;
-    box-shadow: 2px 2px 3px 3px rgb(196, 196, 196);
+    box-shadow: 2px 2px 2px 2px rgb(172, 172, 172);
     z-index: 201;
+    border: 1px solid rgb(112, 255, 255);
 }
 
-.message-display progress {
-    width: 80px;
-    margin-left: 8px;
+.message-display>div:first-child {
+    position: relative;
+    z-index: 101;
+}
+
+.message-display>div:nth-child(2) {
+    z-index: 100;
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 0;
+    height: 100%;
+    border-radius: inherit;
+    background-color: rgb(188, 255, 255);
+    animation: fillBackground 3s forwards ease-out;
 }
 
 #open-shared-file-link {

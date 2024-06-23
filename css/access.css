@@ -1,0 +1,121 @@
+:root {
+    --button-color: #f3e779;
+}
+
+body {
+    background: linear-gradient(to bottom, #fff1c3, #ffdfb4) fixed;
+}
+
+input[type=text],
+input[type=password] {
+    width: 150px;
+}
+
+input[type=checkbox] {
+    width: 18px;
+    height: 18px;
+    vertical-align: bottom;
+}
+
+main {
+    user-select: none;
+    text-align: center;
+    position: fixed;
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    margin: auto;
+    width: fit-content;
+    height: fit-content;
+    background-color: transparent;
+}
+
+main>* {
+    box-sizing: border-box;
+    width: 100%;
+    height: fit-content;
+    padding: 15px;
+    border-radius: 10px;
+    border-bottom: 2px solid gray;
+    background-color: white;
+    margin: auto;
+    margin-top: 15px;
+}
+
+table {
+    margin: auto;
+}
+
+tr td:first-child {
+    text-align: right;
+}
+
+tr td:last-child {
+    text-align: left;
+}
+
+.red {
+    color: red;
+}
+
+@keyframes circle {
+    0% {
+        transform: rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+#return-button,
+#process-button {
+    font-size: large;
+    padding: 5px;
+    padding-left: 20px;
+    padding-right: 20px;
+}
+
+#loading-circle {
+    display: none;
+    vertical-align: middle;
+    width: 20px;
+    height: 20px;
+    margin: auto;
+    border: 4px solid #000;
+    border-top-color: rgba(0, 0, 0, 0.2);
+    border-right-color: rgba(0, 0, 0, 0.2);
+    border-bottom-color: rgba(0, 0, 0, 0.2);
+    border-radius: 100%;
+    animation: circle infinite 0.75s linear;
+}
+
+#pic {
+    display: inline-block;
+    vertical-align: middle;
+}
+
+#options-box {
+    font-size: large;
+    padding: 5px;
+    display: flex;
+    gap: 10px;
+}
+
+#options-box>span {
+    flex: 1;
+    font-weight: bold;
+    border-radius: 5px;
+    padding: 5px;
+    transition-duration: .2s;
+}
+
+#options-box>span:hover {
+    background-color: var(--yellow-color);
+}
+
+.titler {
+    font-size: large;
+    font-weight: bold;
+}

@@ -44,14 +44,19 @@ function loadingAnimation(showOrHide) {
     }
 }
 
-function showMessage(text, length = 3000) {
+
+
+function showMessage(text, state) {
     let messageObj = document.createElement("div");
-    messageObj.className = "message-display";
-    messageObj.innerHTML = '<div class="strong">新消息</div>\
-	<div>' + text + '</div>\
-    <div><small>' + new Date().toLocaleTimeString("zh-CN") + '<progress value=0></progress></small></div>\
-    ';
-    messageObj.getElementsByTagName("progress")[0].max = length;
+    messageObj.classList = ["message-display"];
+    messageObj.innerHTML = `
+    <div>
+        <div>✅
+        ${text}
+        <small>${new Date().toLocaleTimeString("zh-CN")}</small></div>
+    </div>
+    <div class='message-background-shader'></div>
+    `;
     messageObj.style.opacity = 0;
     document.body.appendChild(messageObj);
     let paceLeft = -messageObj.offsetWidth;
@@ -62,29 +67,21 @@ function showMessage(text, length = 3000) {
             paceLeft += 20;
         } else {
             clearInterval(main);
-            let waitedTime = 0;
-            setInterval(() => {
-                if (waitedTime >= length) {
-                    messageObj.onclick = () => { }
-                    let main = setInterval(() => {
-                        messageObj.style.left = paceLeft + "px";
-                        if (paceLeft > -messageObj.offsetWidth) {
-                            paceLeft -= 20;
-                        } else {
-                            messageObj.remove();
-                            clearInterval(main);
-                            return;
-                        }
-                    }, 20);
-                } else {
-                    waitedTime += 50;
-                    messageObj.getElementsByTagName("progress")[0].value = waitedTime;
-                }
-            }, 50);
+            setTimeout(() => {
+                let main = setInterval(() => {
+                    messageObj.style.left = paceLeft + "px";
+                    if (paceLeft > -messageObj.offsetWidth) {
+                        paceLeft -= 20;
+                    } else {
+                        messageObj.remove();
+                        clearInterval(main);
+                        return;
+                    }
+                }, 20);
+            }, 2800);
         }
     }, 20);
 }
-
 
 function getCookie(name) {
     var strcookie = document.cookie;//获取cookie字符串
@@ -122,7 +119,6 @@ function sendRequest(args, callback, result = true) {
             } else {
                 console.error("Not a function:" + callback.toString());
             }
-
         }
     }
     xmlhttp.open("POST", "process.php?id=" + getCookie("KivoText-loginID") + "&" + args, true);
