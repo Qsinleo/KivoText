@@ -1,3 +1,7 @@
+body {
+    background: linear-gradient(to bottom, white, var(--medium-bg)) fixed;
+}
+
 main {
     box-sizing: border-box;
     width: 95%;
@@ -12,8 +16,6 @@ main {
     border-radius: 25px;
     padding: 25px;
     background-color: var(--light-bg);
-    font-family: "MiSans";
-    font-weight: 300;
     overflow: auto;
     border-bottom: 2px solid gray;
 }
@@ -224,16 +226,24 @@ footer .right button {
     overflow: auto;
 }
 
+#file-list>div {
+    display: flex;
+    gap: 5px;
+}
+
+#file-list>div>div:first-child {
+    flex-grow: 1;
+    overflow-x: auto;
+}
+
+#file-list>div>div:last-child {
+    flex-grow: 0;
+}
+
 .file-label {
     transition-duration: .2s;
     border-bottom: 1px solid;
     padding: 5px;
-}
-
-.file-select-checkbox {
-    width: 16px;
-    height: 16px;
-    vertical-align: baseline;
 }
 
 .user-name-label {
@@ -371,14 +381,14 @@ footer .right button {
     background-color: var(--button-active-color);
 }
 
-.seperator {
+.separator {
     font-size: larger;
     font-weight: bold;
     margin-top: 8px;
     margin-bottom: 8px;
 }
 
-.seperator::before {
+.separator::before {
     margin-right: 4px;
     content: "|";
     border-radius: 5px;
@@ -406,9 +416,8 @@ footer .right button {
     box-sizing: border-box;
     background-color: white;
     border-radius: inherit;
-    padding: 5px;
+    padding: 10px;
     margin: 5px;
-    font-style: italic;
 }
 
 .pop-content {

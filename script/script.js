@@ -1,10 +1,6 @@
 
 // DEFINE THE CONSTANT
-let fileNameLimitLength;
-let shareCodeLength;
-let fileLengthLimit;
-let filesCountLimit;
-let deleteFileAble;
+let config = {};
 let themes;
 let originText = null;
 
@@ -16,7 +12,7 @@ function getFileStatus(flag) {
         case "is-saved":
             return document.getElementById("file-save-status-label").className == "green-text" || document.getElementById("file-editable-label").className == "yellow-text";
         case "is-short-to-save":
-            return fileLengthLimit !== null && (textStatic()[0] > fileLengthLimit);
+            return config.fileLengthLimit !== null && (textStatic()[0] > config.fileLengthLimit);
         case "is-shared":
             return document.getElementById("shared-status").className == "green";
         default:
@@ -50,10 +46,6 @@ function operationOfFiles(type, fileid) {
                     break;
                 }
             }
-            document.getElementById("file-not-open-hint").style.display = "block";
-            document.getElementById("file-not-open-hint").style.removeProperty("font-style")
-            document.getElementById("file-not-open-hint").style.fontWeight = "bold";
-            document.getElementById("file-not-open-hint").innerText = "正在打开文件" + fileInfoFormatter() + "……";
             loadFileMeta(null, true, fileid);
             break;
         case "save-file":
@@ -71,6 +63,7 @@ function operationOfFiles(type, fileid) {
             sendRequest("type=save-file&fileid=" + fileid + "&filecontent=" + encodeURIComponent(document.getElementById("main-text-editor").value), (response) => {
                 showMessage("保存文件成功！")
                 loadingAnimation(false);
+                loadUserInfo();
                 loadFileMeta(null, true, fileid);
             }, false); //刷新共享状态;
             break;
@@ -83,9 +76,6 @@ function operationOfFiles(type, fileid) {
         case "close-file-force":
             document.getElementById("file-opened-area").style.display = "none";
             document.getElementById("file-not-open-hint").style.display = "block";
-            document.getElementById("file-not-open-hint").style.fontStyle = "italic";
-            document.getElementById("file-not-open-hint").style.removeProperty("font-weight");
-            document.getElementById("file-not-open-hint").innerText = "可在“文件列表”选择文件打开。";
             for (const each of document.getElementsByClassName("file-label")) {
                 if (each.getAttribute("fileID") == fileid) {
                     each.style.removeProperty("background-color");
@@ -94,24 +84,17 @@ function operationOfFiles(type, fileid) {
             }
             break;
         case "rename-file":
-            var askName = prompt("请为文件" + fileInfoFormatter() + "指定新文件名，长度不能超过" + fileNameLimitLength + "：");
+            var askName = prompt("请为文件" + fileInfoFormatter() + "指定新文件名，长度不能超过" + config.fileNameLimitLength + "：");
             if (askName) {
-                if (askName.length > fileNameLimitLength) {
-                    alert("文件名错误：长度过长（" + askName.length + "/" + fileNameLimitLength + "）！")
+                if (askName.length > config.fileNameLimitLength) {
+                    alert(`文件名错误：长度过长（${askName.length}/${config.fileNameLimitLength}）！`)
                 } else {
                     loadingAnimation(true);
                     sendRequest("type=rename-file&newname=" + encodeURIComponent(askName) + "&fileid=" + fileid, (response) => {
                         if (document.getElementById("file-info").getElementsByTagName("span")[1].innerText == fileid) {
                             document.getElementById("file-info").getElementsByTagName("span")[0].innerText = askName;
                         }
-                        loadUserInfo(() => {
-                            for (const each of document.getElementsByClassName("file-label")) {
-                                if (each.getAttribute("fileID") == fileid && document.getElementById("file-not-open-hint").style.display == "none") {
-                                    each.getElementsByClassName("open-file-button")[0].disabled = "disabled";
-                                    each.style.backgroundColor = "var(--high-light-color)";
-                                }
-                            }
-                        });
+                        loadUserInfo();
                     }, false);
                 }
             }
@@ -125,17 +108,16 @@ function operationOfFiles(type, fileid) {
             document.getElementById("file-save-status-label").className = "green-text";
             break;
         case "create-file":
-            if (filesCountLimit !== null) {
-                if (parseInt(document.getElementById("total-files-label").innerText) >= filesCountLimit) {
+            if (config.filesCountLimit !== null) {
+                if (parseInt(document.getElementById("total-files-label").innerText) >= config.filesCountLimit) {
                     showMessage("创建文件失败：文件数量超出限制！");
                     break;
                 }
             }
-
-            var askName = prompt("请指定新文件名，留空以取消，长度不能超过" + fileNameLimitLength + "：");
+            var askName = prompt("请指定新文件名，留空以取消，长度不能超过" + config.fileNameLimitLength + "：");
             if (askName) {
-                if (askName.length > fileNameLimitLength) {
-                    alert("文件名错误：长度过长（" + askName.length + "/" + fileNameLimitLength + "）！")
+                if (askName.length > config.fileNameLimitLength) {
+                    alert(`文件名错误：长度过长（${askName.length}/${config.fileNameLimitLength}）！`)
                 } else {
                     loadingAnimation(true);
                     sendRequest("type=create-file&filename=" + encodeURIComponent(askName), (response) => {
@@ -147,7 +129,7 @@ function operationOfFiles(type, fileid) {
             }
             break;
         case "delete-file":
-            if (deleteFileAble == 0) {
+            if (config.deleteFileAble == 0) {
                 showMessage("删除失败：你没有删除文件的权限！");
                 break;
             }
@@ -162,6 +144,9 @@ function operationOfFiles(type, fileid) {
                         operationOfFiles("close-file", fileid);
                     }
                     displaySelectInfo();
+                    if (type == "delete-file") {
+                        showMessage("删除文件成功！");
+                    }
                 });
             }, false);
             break;
@@ -185,30 +170,30 @@ function operationOfFiles(type, fileid) {
             loadingAnimation(true);
             sendRequest("type=read-file&fileid=" + fileid, (response) => {
                 if (saveFlag) {
-                    downloadFile(document.getElementById("main-text-editor").value, JSON.parse(response).fileinfo.name + ".txt");
+                    downloadFile(document.getElementById("main-text-editor").value, response.fileinfo.name + ".txt");
                 } else {
-                    downloadFile(JSON.parse(response).fileinfo.content, JSON.parse(response).fileinfo.name + ".txt");
+                    downloadFile(response.fileinfo.content, response.fileinfo.name + ".txt");
                 } loadingAnimation(false);
             }, true);
             break;
         case "copy-file":
-            if (fileLengthLimit != null) {
-                if (textStatic()[0] > fileLengthLimit) {
+            if (config.fileLengthLimit != null) {
+                if (textStatic()[0] > config.fileLengthLimit) {
                     showMessage("另存为失败：当前文件内容长度超出了限制！可在“权限查看”页面确认权限。");
                     break;
                 }
             }
 
             if (getFileStatus("is-open") && !getFileStatus("is-saved") && document.getElementById("file-info").getElementsByTagName("span")[1].innerText == fileid) {
-                var askName = prompt("请为" + fileInfoFormatter() + "指定新文件名，长度不能超过" + fileNameLimitLength + "！留空以取消。\n【注意】：你另存为的文件是正在编辑的文件，请先保存，否则文件内容将与现在编辑内容不一致！");
+                var askName = prompt("请为" + fileInfoFormatter() + "指定新文件名，长度不能超过" + config.fileNameLimitLength + "！留空以取消。\n【注意】：你另存为的文件是正在编辑的文件，请先保存，否则文件内容将与现在编辑内容不一致！");
             } else {
-                var askName = prompt("请为" + fileInfoFormatter() + "指定新文件名，长度不能超过" + fileNameLimitLength + "！留空以取消。");
+                var askName = prompt("请为" + fileInfoFormatter() + "指定新文件名，长度不能超过" + config.fileNameLimitLength + "！留空以取消。");
             }
             if (!askName) {
                 break;
             }
-            if (askName.length > fileNameLimitLength) {
-                alert("文件名错误：长度过长（" + askName.length + "/" + fileNameLimitLength + "）！");
+            if (askName.length > config.fileNameLimitLength) {
+                alert(`文件名错误：长度过长（${askName.length}/${config.fileNameLimitLength}）！`);
             } else {
                 loadingAnimation(true);
                 sendRequest("type=copy-file&newname=" + encodeURIComponent(askName) + "&fileid=" + fileid, (response) => {
@@ -232,20 +217,19 @@ function operationOfFiles(type, fileid) {
             document.getElementById("request-shared-file-status-label").className = "blue";
             sendRequest("type=open-shared-file&sharecode=" + document.getElementById("share-code-input").value, (response) => {
                 loadingAnimationInPopup(false);
-                if (response == "openSharedFile.error.shareCodeErrorOrShareIsClosed") {
+                if (response.status == "error.shareCodeErrorOrShareIsClosed") {
                     document.getElementById("request-shared-file-status-label").innerText = "共享码错误或文件关闭共享";
                     document.getElementById("request-shared-file-status-label").className = "red";
                 } else {
-                    const result = JSON.parse(response.slice(7));
                     document.getElementById("request-shared-file-status-label").innerText = "文件打开成功";
                     document.getElementById("request-shared-file-status-label").className = "green";
-                    document.getElementById("shared-file-info").getElementsByTagName("span")[0].innerText = result.name;
-                    document.getElementById("shared-file-info").getElementsByTagName("span")[1].innerText = result.fileid;
-                    document.getElementById("shared-file-info").getElementsByTagName("span")[2].innerText = result.lastmodifiedtime;
-                    document.getElementById("shared-file-info").getElementsByTagName("span")[3].innerText = result.ownername;
-                    document.getElementById("shared-file-info").getElementsByTagName("span")[4].innerText = result.readtimes;
-                    document.getElementById("shared-file-text-editor").value = result.content;
-                    console.log(result.content)
+                    document.getElementById("shared-file-info").getElementsByTagName("span")[0].innerText = response.name;
+                    document.getElementById("shared-file-info").getElementsByTagName("span")[1].innerText = response.fileid;
+                    document.getElementById("shared-file-info").getElementsByTagName("span")[2].innerText = response.lastmodifiedtime;
+                    document.getElementById("shared-file-info").getElementsByTagName("span")[3].innerText = response.ownername;
+                    document.getElementById("shared-file-info").getElementsByTagName("span")[4].innerText = response.readtimes;
+                    document.getElementById("shared-file-text-editor").value = response.content;
+                    console.log(response.content)
                     document.getElementById("shared-file-text-editor").disabled = "";
                     for (const each of document.getElementById("shared-file-operator").getElementsByTagName("button")) {
                         each.disabled = "";
@@ -272,19 +256,19 @@ function operationOfFiles(type, fileid) {
             downloadFile(document.getElementById("shared-file-text-editor").value, document.getElementById("shared-file-info").getElementsByTagName("span")[0].innerText);
             break;
         case "resave-shared-file":
-            if (filesCountLimit != null) {
-                if (parseInt(document.getElementById("total-files-label").innerText) >= filesCountLimit) {
+            if (config.filesCountLimit != null) {
+                if (parseInt(document.getElementById("total-files-label").innerText) >= config.filesCountLimit) {
                     showMessage("转存文件失败：文件数量超出限制！");
                     break;
                 }
             }
-            if (fileLengthLimit != null) {
-                if (textStatic()[1] > fileLengthLimit) {
+            if (config.fileLengthLimit != null) {
+                if (textStatic()[1] > config.fileLengthLimit) {
                     showMessage("另存为失败：当前文件内容长度超出了自己的限制！可在自己的“权限查看”页面确认权限。");
                     break;
                 }
             }
-            var askName = prompt("请输入转存后的新文件名，长度不能超过" + fileNameLimitLength + "！留空以沿用原名称。");
+            var askName = prompt("请输入转存后的新文件名，长度不能超过" + config.fileNameLimitLength + "！留空以沿用原名称。");
             if (askName === null) {
                 break;
             }
@@ -298,7 +282,7 @@ function operationOfFiles(type, fileid) {
                         each.disabled = "";
                     }
                 });
-            });
+            }, false);
             break;
         default:
             break;
@@ -324,54 +308,50 @@ function loadUserInfo(callback = {}) {
     loadingAnimation(true);
     sendRequest("type=request-info", (response) => {
         // 加载用户基本数据
-        response = JSON.parse(response);
         if (response.needrelogin) {
-            document.cookie = "KivoText-loginID=; max-age=Thu, 01 Jan 1970 00:00:00 GMT";
-            alert("账号已在其他地方登录，点击“确定”重新登录.\n新的登录IP:" + response.userinfo.lastloginIP + "，如非你的操作，则可能已被盗号。")
-            location.reload();
+            alert("账号已在其他地方登录，点击“确定”重新登录。\n新的登录IP:" + response.userinfo.lastloginIP + "，如非你的操作，则可能已被盗号。");
+            logoutAndReload();
         }
         for (const each of document.getElementsByClassName("user-name-label")) {
             each.innerText = response.userinfo.name;
         };
         for (const each of document.getElementsByClassName("user-id-label")) {
-            each.innerText = getCookie("KivoText-loginID");
+            each.innerText = response.userinfo.id;
         };
+        document.getElementById("login-ip-label").innerText = response.userinfo.lastloginIP;
         document.getElementById("last-online-time-label").innerText = response.userinfo.lastonlinetime;
-
         function resolveString(str) {
             if (str !== null)
                 return parseInt(str);
             else
                 return null;
         }
-        fileNameLimitLength = resolveString(response.constants.fileNameLimitLength);
-        shareCodeLength = resolveString(response.constants.shareCodeLength);
-        fileLengthLimit = resolveString(response.constants.fileLengthLimit);
-        filesCountLimit = resolveString(response.constants.filesCountLimit);
-        deleteFileAble = resolveString(response.constants.deleteFileAble);
+        for (const i in response.constants) {
+            config[i] = resolveString(response.constants[i]);
+        };
         for (const each of document.getElementsByClassName("files-count-limit-label")) {
-            each.innerText = (filesCountLimit === null ? "无限制" : filesCountLimit);
+            each.innerText = (config.filesCountLimit === null ? "无限制" : config.filesCountLimit);
         }
         for (const each of document.getElementsByClassName("file-length-limit-label")) {
-            each.innerText = (fileLengthLimit === null ? "无限制" : fileLengthLimit);
+            each.innerText = (config.fileLengthLimit === null ? "无限制" : config.fileLengthLimit);
         }
 
-        if (response.files.length >= filesCountLimit && filesCountLimit !== null) {
+        if (response.files.length >= config.filesCountLimit && config.filesCountLimit !== null) {
             document.getElementById("total-files-label").className = "red-text";
-        } else if (response.files.length >= filesCountLimit - 3 && filesCountLimit !== null) {
+        } else if (response.files.length >= config.filesCountLimit - 3 && config.filesCountLimit !== null) {
             document.getElementById("total-files-label").className = "yellow-text";
         } else {
             document.getElementById("total-files-label").className = "green-text";
         }
-
-        document.getElementById("file-name-length-limit-label").innerText = fileNameLimitLength;
-        if (deleteFileAble == 0) {
+        document.getElementById("file-name-length-limit-label").innerText = config.fileNameLimitLength;
+        if (config.deleteFileAble == 0) {
             document.getElementById("delete-file-able-label").className = "red-text";
             document.getElementById("delete-file-able-label").innerText = "不可";
         } else {
             document.getElementById("delete-file-able-label").className = "green-text";
             document.getElementById("delete-file-able-label").innerText = "可以";
         }
+
         // 加载文件
         document.getElementById("file-list").innerHTML = "";
         document.getElementById("total-files-label").innerText = response.files.length;
@@ -380,26 +360,30 @@ function loadUserInfo(callback = {}) {
             for (const each of response.files) {
                 let fileObj = document.createElement("div");
                 fileObj.className = "file-label";
-                fileObj.innerHTML = '<input type="checkbox" class="file-select-checkbox" />\
-            <small>' + order++ + '</small>\
-            <span class="file-name" title="ID:' + each.id + '">' + each.name + '</span>\
-            '+ (each.avaliable == "1" ? '<span class="shared-file-icon">已共享</span>' : '') + '<button class="open-file-button">打开</button>';
+                fileObj.innerHTML = `<div><input type="checkbox" class="file-select-checkbox" />\
+            <small>${order++}</small>
+            <span class="file-name" title="ID:${each.id}">${each.name}</span>
+            ${(each.avaliable == "1" ? '<span class="shared-file-icon">已共享</span>' : '')}</div>
+            <div><button class="open-file-meta-button">属性</button><button class="open-file-button">打开</button></div>`;
                 fileObj.setAttribute("fileID", each.id);
                 document.getElementById("file-list").appendChild(fileObj);
-            }
-            document.getElementById("files-operator-list").style.display = "block";
-            for (const each of document.getElementsByClassName("open-file-button")) {
-                each.onclick = () => {
-                    operationOfFiles("open-file", each.parentElement.getAttribute("fileID"));
-                };
-            }
-            for (const each of document.getElementsByClassName("file-select-checkbox")) {
-                each.onchange = () => {
+                fileObj.getElementsByClassName("open-file-button")[0].onclick = () => {
+                    operationOfFiles("open-file", each.id);
+                }
+                fileObj.getElementsByClassName("open-file-meta-button")[0].onclick = () => {
+                    document.getElementById("file-meta-file-name-label").innerText = each.name;
+                    document.getElementById("file-meta-file-id-label").innerText = each.id;
+                    document.getElementById("file-meta-last-modified-time-label").innerText = each.lastmodifiedtime;
+                    document.getElementById("file-meta-file-length-label").innerText = each.filesize;
+                    openPopup("file-meta");
+                }
+                fileObj.getElementsByClassName("file-select-checkbox")[0].onchange = () => {
                     displaySelectInfo();
                 }
             }
+            document.getElementById("files-operator-list").style.display = "block";
             for (const each of document.getElementsByClassName("file-label")) {
-                if (each.getAttribute("fileID") == document.getElementById("file-info").getElementsByTagName("span")[1].innerText && document.getElementById("file-not-open-hint").style.display == "none") {
+                if (each.getAttribute("fileID") == document.getElementById("file-info").getElementsByTagName("span")[1].innerText && getFileStatus("is-open")) {
                     each.getElementsByClassName("open-file-button")[0].disabled = "disabled";
                     each.style.backgroundColor = "var(--high-light-color)";
                 } else {
@@ -407,7 +391,6 @@ function loadUserInfo(callback = {}) {
                 }
             }
             displaySelectInfo();
-            setStyle();
             document.getElementById("reset-uploaded-files-button").click();
         } else {
             let obj = document.createElement("div");
@@ -464,18 +447,17 @@ function loadFileMeta(callback = {}, changeTextarea = false, fileid = document.g
         };
         document.getElementById("file-not-open-hint").style.display = "none";
         document.getElementById("file-opened-area").style.display = "block";
-        let fileObj = JSON.parse(response);
-        document.getElementById("file-info").getElementsByTagName("span")[0].innerText = fileObj.fileinfo.name;
-        document.getElementById("file-info").getElementsByTagName("span")[1].innerText = fileObj.fileinfo.id;
-        document.getElementById("file-info").getElementsByTagName("span")[2].innerText = fileObj.fileinfo.lastmodifiedtime;
+        document.getElementById("file-info").getElementsByTagName("span")[0].innerText = response.fileinfo.name;
+        document.getElementById("file-info").getElementsByTagName("span")[1].innerText = response.fileinfo.id;
+        document.getElementById("file-info").getElementsByTagName("span")[2].innerText = response.fileinfo.lastmodifiedtime;
         document.getElementById("close-file-button").disabled = "";
         if (changeTextarea) {
             document.getElementById("file-save-status-label").innerText = "所有更改已经保存";
             document.getElementById("file-save-status-label").className = "green-text";
-            document.getElementById("main-text-editor").value = fileObj.fileinfo.content;
+            document.getElementById("main-text-editor").value = response.fileinfo.content;
         }
-        originText = fileObj.fileinfo.content;
-        if (fileObj.shareinfo.avaliable == 1) {
+        originText = response.fileinfo.content;
+        if (response.shareinfo.avaliable == 1) {
             document.getElementById("switch-share-status-button").innerText = "关闭共享";
             document.getElementById("shared-status").innerText = "已共享";
             document.getElementById("shared-status").className = "green";
@@ -485,13 +467,13 @@ function loadFileMeta(callback = {}, changeTextarea = false, fileid = document.g
             document.getElementById("shared-status").className = "red";
         }
         // 共享信息
-        document.getElementById("share-code-label").innerText = fileObj.shareinfo.sharecode;
-        document.getElementById("shared-file-visited-times-label").innerText = fileObj.sharedfilereadinfo.length;
+        document.getElementById("share-code-label").innerText = response.shareinfo.sharecode;
+        document.getElementById("shared-file-visited-times-label").innerText = response.sharedfilereadinfo.length;
         document.getElementById("has-read-shared-file-list").innerHTML = "";
 
-        if (fileObj.sharedfilereadinfo.length) {
+        if (response.sharedfilereadinfo.length) {
             let existOneRead = false;
-            for (const each of fileObj.sharedfilereadinfo) {
+            for (const each of response.sharedfilereadinfo) {
                 if (document.getElementById("read-list-time-filter").value != "all") {
                     if (!dateDiffWithinNDays(new Date(), new Date(each.readtime), parseInt(document.getElementById("read-list-time-filter").value))) {
                         continue;
@@ -509,10 +491,10 @@ function loadFileMeta(callback = {}, changeTextarea = false, fileid = document.g
         } else {
             document.getElementById("has-read-shared-file-list").innerHTML = "<i>暂时无人观看</i>";
         }
-        if (fileObj.shareinfo.avaliable == 1) {
+        if (response.shareinfo.avaliable == 1) {
             document.getElementById("file-editable-label").innerText = "只读模式(共享文件)";
             document.getElementById("file-editable-label").className = "yellow-text";
-        } else if (fileLengthLimit < 0) {
+        } else if (config.fileLengthLimit < 0) {
             document.getElementById("file-editable-label").innerText = "只读模式(账号限制)";
             document.getElementById("file-editable-label").className = "yellow-text";
         } else {
@@ -525,7 +507,13 @@ function loadFileMeta(callback = {}, changeTextarea = false, fileid = document.g
             callback();
         }
     }, true);
+}
 
+function logoutAndReload() {
+    // 退出登录
+    localStorage.removeItem("KivoText-username");
+    localStorage.removeItem("KivoText-encpassword");
+    location.reload();
 }
 
 document.getElementById("now-loading-content").innerText = "样式和字体文件";
@@ -546,14 +534,15 @@ window.onload = () => {
             themes = JSON.parse(xmlhttp.responseText);
             if (/Android|webOS|iPhone|iPod|BlackBerry/i.test(navigator.userAgent) && !/Html5Plus/i.test(navigator.userAgent)) {
                 // 手机版且不是MUI
-                if (!getCookie("KivoText-hasRecommendedMobilephoneAPK") || getCookie("KivoText-hasRecommendedMobilephoneAPK") == "false") {
+                if (!getCookie("KivoText-recommendedAPK") || getCookie("KivoText-recommendedAPK") == "false") {
                     //未推荐过
                     openPopup("mobilephone-apk-recommend");
-                    document.cookie = "KivoText-hasRecommendedMobilephoneAPK=false; max-age=" + new Date(new Date().getTime() + 3600000 * 24 * 7).toUTCString();
+                    document.cookie = "KivoText-recommendedAPK=false; max-age=" + (86400 * 7);
                     document.getElementById("no-ask-download-apk-again").checked = "";
                 }
             }
-            if (getCookie("KivoText-loginID")) {
+
+            if (isLogined()) {
                 document.getElementById("now-loading-content").innerText = "用户数据";
                 //已登录
                 document.getElementById("need-login").remove();
@@ -563,8 +552,8 @@ window.onload = () => {
                     operationOfFiles("close-shared-file");
                     checkServer(true, 5000);
                     setInterval(() => {
-                        if (document.getElementById("file-not-open-hint").style.display == "none" && !(getFileStatus("is-saved"))) {
-                            showMessage("记得保存你的编辑！", 3000);
+                        if (getFileStatus("is-open") && !(getFileStatus("is-saved"))) {
+                            showMessage("记得保存你的编辑！");
                         }
                     }, 60000);
                 });
@@ -577,8 +566,8 @@ window.onload = () => {
                     const elements = document.getElementsByClassName('pop-content');
                     for (var i = elements.length - 1; i >= 0; i--) {
                         var element = elements[i];
-                        if (element.getAttribute('type') != 'theme-selector' &&
-                            element.getAttribute('type') != 'mobilephone-apk-recommend') {
+                        if (element.dataset.type != 'theme-selector' &&
+                            element.dataset.type != 'mobilephone-apk-recommend') {
                             element.parentNode.removeChild(element);
                         }
                     }

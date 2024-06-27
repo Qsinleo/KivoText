@@ -5,7 +5,6 @@ function bindEvents(logined) {
         document.getElementById("theme-selector-link").addEventListener("click", () => {
             openPopup("theme-selector");
         });
-
         {
             document.getElementById("font-selector").addEventListener("change", () => {
                 setStyle();
@@ -42,7 +41,7 @@ function bindEvents(logined) {
 
             if (getCookie("KivoText-preferTheme")) {
                 if (validCookie) {
-                    document.cookie = "KivoText-preferTheme=" + getCookie("KivoText-preferTheme") + "; max-age=" + new Date(new Date().getTime() + 3600000 * 24 * 7).toUTCString();
+                    document.cookie = "KivoText-preferTheme=" + getCookie("KivoText-preferTheme") + "; max-age=" + (86400 * 7);
                 } else {
                     showMessage("无效的本地偏爱主题设置。已为你恢复默认设置。");
                     document.getElementById("theme-selector").value = document.getElementById("theme-selector").firstElementChild.value;
@@ -63,9 +62,9 @@ function bindEvents(logined) {
 
         document.getElementById("no-ask-download-apk-again").addEventListener("change", () => {
             if (document.getElementById("no-ask-download-apk-again").checked) {
-                document.cookie = "KivoText-hasRecommendedMobilephoneAPK=true; max-age=" + new Date(new Date().getTime() + 3600000 * 24 * 7).toUTCString();
+                document.cookie = "KivoText-recommendedAPK=true; max-age=" + (86400 * 7);
             } else {
-                document.cookie = "KivoText-hasRecommendedMobilephoneAPK=false; max-age=" + new Date(new Date().getTime() + 3600000 * 24 * 7).toUTCString();
+                document.cookie = "KivoText-recommendedAPK=false; max-age=" + (86400 * 7);
             }
         });
     }
@@ -127,8 +126,7 @@ function bindEvents(logined) {
 
         document.getElementById("logout-link").addEventListener("click", () => {
             if (confirm("确定要退出登录吗？")) {
-                document.cookie = "KivoText-loginID=; max-age=Thu, 01 Jan 1970 00:00:00 GMT";
-                location.reload();
+                logoutAndReload();
             }
         });
         document.getElementById("more-account-settings-link").addEventListener("click", () => {
@@ -136,7 +134,7 @@ function bindEvents(logined) {
         });
         document.getElementById("delete-account-link").addEventListener("click", () => {
             let secondCheckPassword = Math.floor(Math.random() * 8999 + 1000);
-            if (prompt("你确定吗？所有文件都将丢失。如果确定，请输入验证码：" + secondCheckPassword.toString(), "请输入验证码") == secondCheckPassword) {
+            if (prompt("你确定吗？所有文件和数据都将丢失。如果确定，请输入验证码：" + secondCheckPassword.toString()) == secondCheckPassword) {
                 loadingAnimationInPopup(true);
                 sendRequest("type=delete-account", (response) => {
                     alert("账号已注销。感谢你的使用，期待下次再见。按下确定键重启页面。");
@@ -148,10 +146,10 @@ function bindEvents(logined) {
             if (verify("password")) {
                 loadingAnimationInPopup(true);
                 sendRequest("type=change-password&oldpasswordENC=" + sha1(document.getElementById("change-password-panel").getElementsByTagName("input")[0].value) + "&newpasswordENC" + sha1(document.getElementById("change-password-panel").getElementsByTagName("input")[1].value), (response) => {
-                    loadingAnimationInPopup(false);
                     switch (response) {
                         case "changePassword.success":
                             alert("更改密码成功。请牢记。");
+                            localStorage.setItem("KivoText-encpassword", sha1(document.getElementById("change-password-panel").getElementsByTagName("input")[1].value))
                             for (const each of document.getElementById("change-password-panel").getElementsByTagName("input")) {
                                 each.value = "";
                             }
@@ -161,6 +159,7 @@ function bindEvents(logined) {
                         default:
                             break;
                     }
+                    loadingAnimationInPopup(false);
                 });
             }
         });
@@ -174,6 +173,7 @@ function bindEvents(logined) {
                             document.getElementById("change-username-panel").getElementsByClassName("red-text")[0].innerText = "用户名已存在！";
                             break;
                         case "changeUserName.success":
+                            localStorage.setItem("KivoText-username", document.getElementById("change-username-panel").getElementsByTagName("input")[0].value);
                             for (const each of document.getElementsByClassName("user-name-label")) {
                                 each.innerText = document.getElementById("change-username-panel").getElementsByTagName("input")[0].value;
                             }
@@ -209,6 +209,10 @@ function bindEvents(logined) {
         document.getElementById("refresh-files-button").addEventListener("click", () => {
             loadUserInfo();
         });
+        document.getElementById("show-user-meta-button").addEventListener("click", () => {
+            openPopup("user-meta");
+        });
+        document.getElementById("user-UA-label").innerText = navigator.userAgent;
 
         document.getElementById("main-text-editor").onchange =
             document.getElementById("main-text-editor").onkeydown =
@@ -241,9 +245,9 @@ function bindEvents(logined) {
                     afterUploadedFiles = parseInt(document.getElementById("total-files-label").innerText) + document.getElementById("uploaded-files-list").childElementCount;
                 }
                 document.getElementById("uploaded-files-total-count-label").innerText = afterUploadedFiles;
-                if (afterUploadedFiles >= filesCountLimit && filesCountLimit !== null) {
+                if (afterUploadedFiles >= config.filesCountLimit && config.filesCountLimit !== null) {
                     document.getElementById("uploaded-files-total-count-label").className = "red-text";
-                } else if (afterUploadedFiles >= filesCountLimit - 3 && filesCountLimit !== null) {
+                } else if (afterUploadedFiles >= config.filesCountLimit - 3 && config.filesCountLimit !== null) {
                     document.getElementById("uploaded-files-total-count-label").className = "yellow-text";
                 } else {
                     document.getElementById("uploaded-files-total-count-label").className = "green-text";
@@ -280,8 +284,8 @@ function bindEvents(logined) {
                             fileObj.innerHTML = "\
                                     <div><small>" + count + "</small><b>" + eachFile.name.replace(".txt", "") + "</b></div>\
                                     <button class='red delete-uploaded-file'>删除</button>" +
-                                (eachFile.name.replace(".txt", "").length > fileNameLimitLength || (uploadedFileLength > fileLengthLimit && fileLengthLimit !== null) ? "" : "<label><input type='radio' name='rename-file-type-of-" + count + "' checked/>不重命名</label>") + (uploadedFileLength > fileLengthLimit && fileLengthLimit !== null ? "" : "<label><input type='radio' name='rename-file-type-of-" + count + "' " + (eachFile.name.replace(".txt", "").length > fileNameLimitLength ? "checked" : "")) + " />重命名至</label><input type='text' maxlength='" + fileNameLimitLength + "' value='" + (uploadedFileLength > fileLengthLimit && fileLengthLimit !== null ? "' disabled" : "New File'") + "/>\
-                                    <small><div class='red-text'>" + (uploadedFileLength > fileLengthLimit && fileLengthLimit !== null ? "<b>错误</b> 文件内容长度超出上限（" + uploadedFileLength + "/" + fileLengthLimit + "）" : "") + "</div></small>";
+                                (eachFile.name.replace(".txt", "").length > config.fileNameLimitLength || (uploadedFileLength > config.fileLengthLimit && config.fileLengthLimit !== null) ? "" : "<label><input type='radio' name='rename-file-type-of-" + count + "' checked value='no-rename' />不重命名</label>") + (uploadedFileLength > config.fileLengthLimit && config.fileLengthLimit !== null ? "" : "<label><input type='radio' name='rename-file-type-of-" + count + "' " + (eachFile.name.replace(".txt", "").length > config.fileNameLimitLength ? "checked" : "")) + " value='rename-custom'/>重命名至</label><input type='text' maxlength='" + config.fileNameLimitLength + "' value='" + (uploadedFileLength > config.fileLengthLimit && config.fileLengthLimit !== null ? "' disabled" : "New File'") + "/>\
+                                    <small><div class='red-text'>" + (uploadedFileLength > config.fileLengthLimit && config.fileLengthLimit !== null ? "<b>错误</b> 文件内容长度超出上限（" + uploadedFileLength + "/" + config.fileLengthLimit + "）" : "") + "</div></small>";
                             document.getElementById("uploaded-files-list").appendChild(fileObj);
                             count++;
                             doneOperations++;
@@ -330,13 +334,14 @@ function bindEvents(logined) {
                     alert("没有上传的文件！");
                 } else {
                     // 验证上传文件
-                    if (staticUploadedFilesCount() > filesCountLimit && filesCountLimit !== null) {
-                        alert("文件数量超出限制，请移除（" + staticUploadedFilesCount() + "/" + filesCountLimit + "）。")
+                    if (staticUploadedFilesCount() > config.filesCountLimit && config.filesCountLimit !== null) {
+                        alert("文件数量超出限制，请移除（" + staticUploadedFilesCount() + "/" + config.filesCountLimit + "）。");
+                        return;
                     }
                     let invalidFiles = [];
                     var count = 1;
                     for (const each of uploadedFiles) {
-                        if (getBytes(each) > fileLengthLimit && fileLengthLimit !== null) {
+                        if (getBytes(each) > config.fileLengthLimit && config.fileLengthLimit !== null) {
                             invalidFiles.push(count)
                         }
                         count++;
@@ -392,7 +397,7 @@ function bindEvents(logined) {
                             item.style.width = "initial";
                         }
                         each.style.backgroundColor = "var(--high-light-color)";
-                        each.style.width = "108px";
+                        each.style.width = "120px";
                         for (const item of document.getElementById("file-track-contents").children) {
                             item.style.display = "none";
                         }
@@ -471,7 +476,7 @@ function bindEvents(logined) {
                 document.getElementById("request-shared-file-status-label").innerText = "等待共享码";
                 document.getElementById("request-shared-file-status-label").className = "";
             });
-            document.getElementById("share-code-input").placeholder = "长度为" + shareCodeLength + "，不区分大小写";
+            document.getElementById("share-code-input").placeholder = "长度为" + config.shareCodeLength + "，不区分大小写";
             document.getElementById("close-shared-file-button").addEventListener("click", () => {
                 operationOfFiles("close-shared-file", null);
             });
@@ -501,9 +506,9 @@ function bindEvents(logined) {
 
             function getAllSelctedID() {
                 let result = [];
-                for (const each of document.getElementsByClassName("file-select-checkbox")) {
-                    if (each.checked) {
-                        result.push(each.parentElement.getAttribute("fileID"))
+                for (const each of document.getElementsByClassName("file-label")) {
+                    if (each.getElementsByClassName("file-select-checkbox")[0].checked) {
+                        result.push(each.getAttribute("fileID"))
                     }
                 }
                 return result;
@@ -555,7 +560,7 @@ function bindEvents(logined) {
 
             document.getElementById("copy-file-button").addEventListener("click", () => {
                 if (getAllSelctedID()) {
-                    if (filesCountLimit === null || getAllSelctedID() + parseInt(document.getElementById("total-files-label")) <= filesCountLimit) {
+                    if (config.filesCountLimit === null || getAllSelctedID() + parseInt(document.getElementById("total-files-label")) <= config.filesCountLimit) {
                         for (const each of getAllSelctedID()) {
                             operationOfFiles("copy-file", each);
                         }
@@ -567,7 +572,7 @@ function bindEvents(logined) {
             });
 
             document.getElementById("delete-file-button").addEventListener("click", () => {
-                if (deleteFileAble == 0) {
+                if (config.deleteFileAble == 0) {
                     showMessage("删除失败：你没有删除文件的权限！");
                 } else {
                     if (getAllSelctedID().length > 1 && document.getElementById("multi-operation-no-ask-again").checked) {
@@ -577,15 +582,12 @@ function bindEvents(logined) {
                             }
                             showMessage("删除文件成功");
                         }
-
                     } else if (getAllSelctedID()) {
                         for (const each of getAllSelctedID()) {
                             operationOfFiles("delete-file", each);
                         }
-                        showMessage("删除文件成功");
                     }
                 }
-
             });
         }//文件操作
     }

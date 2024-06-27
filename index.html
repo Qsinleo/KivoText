@@ -22,9 +22,9 @@
 			<div id="popup-border">
 
 				<div>
-					<div class="pop-content" type="more-account-settings">
+					<div class="pop-content" data-type="more-account-settings">
 						<h2>账号操作</h2>
-						<div class="seperator">更改用户名</div>
+						<div class="separator">更改用户名</div>
 						<div id="change-username-panel">
 							<div><label>输入新的用户名：<input type="text" maxlength="18"></label>
 								<div class="red-text"></div>
@@ -32,7 +32,7 @@
 							<button>提交</button>
 							<button>重置</button>
 						</div>
-						<div class="seperator">更改密码</div>
+						<div class="separator">更改密码</div>
 						<div>
 							<table id="change-password-panel">
 								<tr>
@@ -66,14 +66,14 @@
 							</div>
 						</div>
 						<small>本功能建议经常使用，以防隐私泄露。</small>
-						<div class="seperator">危险区域</div>
+						<div class="separator">危险区域</div>
 						<div>
 							<button id="delete-account-link" class="red-text">注销账号</button>
 						</div>
 					</div>
-					<div class="pop-content" type="upload-files">
+					<div class="pop-content" data-type="upload-files">
 						<h2>上传文件</h2>
-						<div class="seperator">文件限制一览</div>
+						<div class="separator">文件限制一览</div>
 						<table>
 							<tr>
 								<td>已有文件数量</td>
@@ -89,14 +89,14 @@
 								<td><b id="file-name-length-limit-label"></b></td>
 							</tr>
 						</table>
-						<div class="seperator">上传文件</div>
+						<div class="separator">上传文件</div>
 						<div>
 							<div>
 								<input type="file" multiple accept=".txt"
 									id="upload-files-input" /><small>提示：每一次选择都会在下方列表新增文件，允许多个文件。</small>
 							</div>
 						</div>
-						<div class="seperator">已上传的文件操作<button class="red-text"
+						<div class="separator">已上传的文件操作<button class="red-text"
 								id="reset-uploaded-files-button">重置</button>
 						</div>
 						<div id="uploaded-files-list"><i>没有上传的文件。</i></div>
@@ -104,9 +104,9 @@
 							<span class="red-text"></span>
 						</div>
 					</div>
-					<div class="pop-content" type="open-shared-file">
+					<div class="pop-content" data-type="open-shared-file">
 						<h2>打开共享文件</h2>
-						<div class="seperator">输入共享码</div>
+						<div class="separator">输入共享码</div>
 						<small>在这里，你可以打开别人共享出来的文件。</small>
 						<div class="flex">
 							<div>
@@ -129,7 +129,7 @@
 						<div class="open-shared-file-status center">
 							文件状态 <span id="request-shared-file-status-label">等待共享码</span>
 						</div>
-						<div class="seperator">查看文件内容</div>
+						<div class="separator">查看文件内容</div>
 						<div id="shared-file-info" class="center">
 							<small>名称</small>
 							<span class="strong"></span>
@@ -160,22 +160,16 @@
 						</div>
 						<textarea id="shared-file-text-editor" readonly></textarea>
 					</div>
-					<div class="pop-content" type="theme-selector">
+					<div class="pop-content" data-type="theme-selector">
 						<h2>主题设置</h2>
-						<div class="seperator">字体选择</div>
+						<div class="separator">字体选择</div>
 						<p>自带的字体为MiSans，由小米公司开发。</p>
 						<select id="font-selector">
-							<optgroup label="MiSans">
-								<option value="MiSans,500">MiSans ExtraBold</option>
-								<option value="MiSans,400">MiSans Bold</option>
-								<option value="MiSans,300" selected>MiSans</option>
-								<option value="MiSans,200">MiSans Light</option>
-							</optgroup>
-							<optgroup label="其他">
-								<option value="unset,unset">默认字体</option>
-							</optgroup>
+							<option value="MiSans">MiSans</option>
+							<option value="unset">默认字体</option>
+							<option disabled>字重调节已被移除</option>
 						</select>
-						<div class="seperator">主题选择</div>
+						<div class="separator">主题选择</div>
 						<label>选择<select id="theme-selector">
 							</select></label>
 						<table id="selected-theme-info-table">
@@ -189,11 +183,11 @@
 							</tr>
 						</table>
 					</div>
-					<div class="pop-content" type="mobilephone-apk-recommend">
+					<div class="pop-content" data-type="mobilephone-apk-recommend">
 						<h2>客户端KivoText推荐</h2>
-						<div class="seperator">介绍</div>
+						<div class="separator">介绍</div>
 						<p>在客户端的KivoText，你将获得更舒适的用户体验，以及全方位的UI适配。</p>
-						<div class="seperator">下载</div>
+						<div class="separator">下载</div>
 						<p>客户端由Duckxu提供，请移步此处以下载：</p>
 						<p class="center"><a href="http://kivotext.duckxu.com">APK下载</a></p>
 						<p><small>提示：客户端版本可能与网页端版本略有不同，属正常现象</small></p>
@@ -201,19 +195,60 @@
 							<label><input type="checkbox" id="no-ask-download-apk-again" checked>下次启动不再提示</label>
 						</div>
 					</div>
-					<div class="pop-content" type="shared-rule">
+					<div class="pop-content" data-type="shared-rule">
 						<h2>文件共享规则</h2>
-						<div class="seperator">未共享时</div>
+						<div class="separator">未共享时</div>
 						<ul>
 							<li>每一次对文件做出新的更改，都将更新共享码。</li>
 							<li>共享码由区分文件和区分更改的两部分组成。</li>
 						</ul>
-						<div class="seperator">共享时</div>
+						<div class="separator">共享时</div>
 						<ul>
 							<li>用户无法编辑文件。</li>
 							<li>须关闭共享后，才能再次编辑并发布。</li>
 							<li><b>更新后的共享码会发生变化，请留意。</b></li>
 						</ul>
+					</div>
+					<div class="pop-content" data-type="user-meta">
+						<h2>用户数据</h2>
+						<div class="separator">限制</div>
+						<table>
+							<tr>
+								<td>文件数上限</td>
+								<td><b class="files-count-limit-label"></b></td>
+							</tr>
+							<tr>
+								<td>删除权限</td>
+								<td><b id="delete-file-able-label"></b></td>
+							</tr>
+							<tr>
+								<td>单文件长度上限</td>
+								<td><b class="file-length-limit-label"></b></td>
+							</tr>
+						</table>
+						<div class="separator">UA信息</div>
+						<code id="user-UA-label"></code>
+					</div>
+					<div class="pop-content" data-type="file-meta">
+						<h2>文件属性</h2>
+						<table>
+							<tr>
+								<td>文件名</td>
+								<td id="file-meta-file-name-label"></td>
+							</tr>
+							<tr>
+								<td>文件ID</td>
+								<td id="file-meta-file-id-label"></td>
+							</tr>
+							<tr>
+								<td>上次更改时间</td>
+								<td id="file-meta-last-modified-time-label"></td>
+							</tr>
+							<tr>
+								<td>字节数（Bytes）</td>
+								<td id="file-meta-file-length-label"></td>
+							</tr>
+						</table>
 					</div>
 				</div>
 				<div id="loading-in-popup">
@@ -224,7 +259,7 @@
 					</div>
 				</div>
 				<div id="close-hint" class="center">
-					点击此处以关闭
+					关闭 & 返回
 				</div>
 			</div>
 
@@ -236,8 +271,11 @@
 						名称 ID:<span class="user-id-label"></span><br>
 						<span class="user-name-label"></span>
 						<hr>
-						<small>上次在线时间<br>
-							<span id="last-online-time-label"></span>
+						<small>
+							上次在线时间<br>
+							<span id="last-online-time-label"></span><br>
+							登录IP<br>
+							<span id="login-ip-label"></span>
 						</small>
 						<a id="more-account-settings-link">账号操作</a>
 						<a id="logout-link">退出登录</a>
@@ -260,16 +298,24 @@
 					<div class="file-explorer">
 						<div>
 							<div>
-								<header>文件列表<button id="refresh-files-button">刷新</button></header>
+								<header>
+									文件列表<button id="refresh-files-button">刷新</button>
+									<button id="show-user-meta-button">用户信息</button>
+								</header>
 								<button class="blue" id="create-new-file-button">创建新文件</button>
 								<button class="green" id="upload-files-link">上传文件</button>
+								<!-- <b>搜索文件</b><input type="text"
+									id="search-file-input" /><button id="search-file-button">搜索</button><button
+									id="show-all-files-button">关闭搜索</button> -->
 							</div>
 
 							共<b id="total-files-label"></b>个文件
+
 						</div>
 						<div id="file-list">
 							<!-- There should be something. -->
 						</div>
+
 						<div class="multi-operation">
 							<div class="strong">文件(批量)操作</div>
 							<div>
@@ -285,14 +331,7 @@
 								<button class="red-text file-operator-button" id="delete-file-button">删除</button>
 								<label><input type="checkbox" id="multi-operation-no-ask-again" />一次性完成操作</label>
 							</div>
-
 						</div>
-						<details>
-							<summary>查看限制</summary>
-							文件数上限<b class="files-count-limit-label"></b>
-							<b id="delete-file-able-label"></b>删除文件
-							单文件长度上限<b class="file-length-limit-label"></b>
-						</details>
 					</div>
 					<div class="editor-area">
 						<header>编辑区域<div class="ping-back">
@@ -300,7 +339,8 @@
 							</div>
 						</header>
 						<div id="file-not-open-hint" class="center">
-							可在“文件列表”选择文件打开。
+							<h3>没有打开的文件✨</h3>
+							<small>可在左侧选择文件打开</small>
 						</div>
 						<div id="file-opened-area">
 							<div id="file-info" class="center">
@@ -466,7 +506,7 @@
 					<button id="download-apk-link">下载客户端</button>
 					<button id="theme-selector-link">主题设置</button>
 				</div>
-				Version 1.0.0 <a href="about.html">ABOUT Page</a>
+				Version 1.1.0 <a href="about.html">ABOUT Page</a>
 			</footer>
 		</main>
 	</body>

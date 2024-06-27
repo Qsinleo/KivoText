@@ -22,6 +22,7 @@ document.getElementById("process-button").addEventListener("click", () => {
                         document.getElementById("name-error").innerText = "用户名或密码错误！";
                         break;
                     case "login.success":
+                        saveToken();
                         document.body.getElementsByTagName("main")[0].innerHTML = "<h2>正在跳转中……</h2>";
                         location.href = "index.html";
                         break;
@@ -35,7 +36,7 @@ document.getElementById("process-button").addEventListener("click", () => {
                         document.getElementById("name-error").innerText = "用户名已存在！";
                         break;
                     case "register.success":
-                        alert("注册成功，点击“确定”返回主界面。");
+                        saveToken();
                         document.body.getElementsByTagName("main")[0].innerHTML = "<h2>正在跳转中……</h2>";
                         location.href = "index.html";
                         break;
@@ -44,46 +45,9 @@ document.getElementById("process-button").addEventListener("click", () => {
                         break;
                 }
             }
-        }, false);
+        }, false, false);
     }
 });
-
-function sendRequest(args, callback) {
-    var xmlhttp;
-    if (window.XMLHttpRequest) {
-        // IE7+, Firefox, Chrome, Opera, Safari 浏览器执行代码
-        xmlhttp = new XMLHttpRequest();
-    }
-    else {
-        // IE6, IE5 浏览器执行代码
-        xmlhttp = new ActiveXObject("Microsoft.XMLHTTP");
-    }
-    xmlhttp.onreadystatechange = function () {
-        if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
-            if (typeof callback == "function") {
-                callback(xmlhttp.responseText);
-            } else {
-                console.error("Not a function:" + callback.toString());
-            }
-        }
-    }
-    xmlhttp.open("POST", "process.php?" + args, true);
-    xmlhttp.send();
-}
-
-
-function getCookie(name) {
-    var strcookie = document.cookie;//获取cookie字符串
-    var arrcookie = strcookie.split("; ");//分割
-    //遍历匹配
-    for (var i = 0; i < arrcookie.length; i++) {
-        var arr = arrcookie[i].split("=");
-        if (arr[0] == name) {
-            return arr[1];
-        }
-    }
-    return null;
-}
 
 function verify() {
     let passed = true;
@@ -106,6 +70,11 @@ function verify() {
         document.getElementById("verifycode-error").innerText = "";
     }
     return passed;
+}
+
+function saveToken() {
+    localStorage.setItem("KivoText-username", document.getElementById("name").value);
+    localStorage.setItem("KivoText-encpassword", sha1(document.getElementById("password").value));
 }
 
 let select;
@@ -133,8 +102,8 @@ document.getElementById("return-button").addEventListener("click", () => {
     location.href = "index.html";
 });
 
-if (getCookie("KivoText-loginID")) {
-    alert("你已登录，ID：" + getCookie("KivoText-loginID") + "，将跳转至首页。");
+if (isLogined()) {
+    alert("你已登录，将跳转至首页。");
     location.href = "index.html";
 } else {
     obj.init("pic", document.getElementById("verify-code"));

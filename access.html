@@ -12,57 +12,61 @@
 
     <body>
         <main>
-            <div class="titler">
-                KivoText
-            </div>
-            <div id="options-box">
-                <span>登录</span>
-                <span>注册</span>
+            <div>
+                <div class="titler">
+                    KivoText
+                </div>
+                <div id="options-box">
+                    <span>登录</span>
+                    <span>注册</span>
+                </div>
             </div>
             <div>
                 <table>
                     <tr>
                         <td>用户名：</td>
                         <td><input type="text" maxlength="18" id="name"></td>
-                        <td class="red" id="name-error"></td>
+                    </tr>
+                    <tr>
+                        <td class="red-err" id="name-error" colspan="2"></td>
                     </tr>
                     <tr>
                         <td>密码：</td>
                         <td><input type="password" maxlength="25" id="password"></td>
-                        <td class="red" id="password-error"></td>
+                    </tr>
+                    <tr>
+                        <td class="red-err" id="password-error" colspan="2"></td>
                     </tr>
                     <tr>
                         <td>验证码：</td>
                         <td>
                             <input type="text" value='' id="verify-code">
                         </td>
-                        <td class="red" id="verifycode-error">
-                        </td>
                     </tr>
-                    <tr>
-                        <td>
-                            <div id="pic"></div>
-                        </td>
-                        <td>
-                            <small>看不清？点击以更换验证码</small>
-                        </td>
-                    </tr>
+                    <td class="red-err" id="verifycode-error" colspan="2">
+                    </td>
+
                 </table>
-            </div>
-            </div>
-            <div>
-                <label title="如果不勾选，则登录状态将维持24小时。">保持登录7天<input type="checkbox" id="keep-logined-checkbox"
-                        checked></label>
-            </div>
-            <div>
-                <button id="return-button">返回</button>
-                <button id="process-button">
-                    提交
-                </button>
-                <div id="loading-circle"></div>
+                <div>
+                    <div id="pic"></div>
+                    <small>看不清？点击以更换验证码</small>
+                </div>
+                <div>
+                    <label title="如果不勾选，则登录状态将维持24小时。">保持登录7天<input type="checkbox" id="keep-logined-checkbox"
+                            checked></label>
+                </div>
+                <div>
+                    <button id="return-button">返回</button>
+                    <button id="process-button">
+                        提交
+                    </button>
+                    <div id="loading-circle"></div>
+                </div>
+
             </div>
         </main>
     </body>
+    <script src="script/tools.js"></script>
     <script src="script/sha1.js"></script>
     <script src="script/verify.js"></script>
     <script src="script/access.js"></script>

@@ -4,6 +4,11 @@ require_once "config.php";
 $con = mysqli_connect("localhost", username, password, database);
 // if ($_SERVER['SERVER_ADDR'] == $_SERVER["REMOTE_ADDR"]) {
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
+    // 找到对应ID
+    $reqID = null;
+    if (array_key_exists("tokenusername", $_REQUEST) && array_key_exists("tokenpassword", $_REQUEST)) {
+        $reqID = mysqli_fetch_assoc(mysqli_query($con, "SELECT * FROM `users` WHERE `name` = '" . mysqli_escape_string($con, $_REQUEST["tokenusername"]) . "'"))["id"];
+    }
     function createSharedRecord($id): void
     {
         global $con;
@@ -46,13 +51,14 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     }
     function getReadersList(): array
     {
-        global $con;
+        global $con, $reqID;
         $readerlist = [];
-        foreach (mysqli_fetch_all(mysqli_query($con, "SELECT * FROM `readsharedfilelog` WHERE `userid` = " . $_REQUEST["id"] . " AND `fileid` = " . $_REQUEST["fileid"]), MYSQLI_ASSOC) as $value) {
+        foreach (mysqli_fetch_all(mysqli_query($con, "SELECT * FROM `readsharedfilelog` WHERE `userid` = " . $reqID . " AND `fileid` = " . $_REQUEST["fileid"]), MYSQLI_ASSOC) as $value) {
             array_push($readerlist, array_merge(mysqli_fetch_assoc(mysqli_query($con, "SELECT * FROM `users` WHERE `id` = " . $value["userid"])), ["readtime" => $value["readtime"]]));
         }
         return $readerlist;
     }
+    // 获得请求token对应ID
     switch ($_REQUEST["type"]) {
         case "ping-back":
             echo "ping.receive";
@@ -65,39 +71,36 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 $addid = mysqli_insert_id($con);
                 mysqli_query($con, "INSERT INTO `accessinfo` VALUES (" . $addid . "," . constant('default-file-length-limit') . "," . constant('default-files-count-limit') . ",1)");
                 if ($_REQUEST["keeplogined"] == "true") {
-                    setcookie("KivoText-loginID", $addid, time() + 60 * 60 * 24 * 7);
+                    // TODO:登录时间
+                    // COOKIE设置:已被移除
                 } else {
-                    setcookie("KivoText-loginID", $addid, time() + 60 * 60 * 24);
+                    // COOKIE设置:已被移除
                 }
                 echo "register.success";
             }
             break;
         case "login":
             $res = mysqli_fetch_assoc(mysqli_query($con, "SELECT * FROM `users` WHERE `name` = '" . mysqli_escape_string($con, $_REQUEST["name"]) . "'"));
-            if (is_null($res)) {
-                echo "login.error.doesNotExistOrPasswordWrong";
-            } elseif ($res["password"] != $_REQUEST["passwordENC"]) {
+            if (is_null($res) || $res["password"] != $_REQUEST["passwordENC"]) {
                 echo "login.error.doesNotExistOrPasswordWrong";
             } else {
-                mysqli_query($con, "UPDATE `users` SET `lastonlinetime` = CURRENT_TIMESTAMP() WHERE `id` = " . $res["id"]);
-                mysqli_query($con, "UPDATE `users` SET `lastloginIP` = '" . getRemoteIP() . "' WHERE `id` = " . $res["id"]);
                 if ($_REQUEST["keeplogined"] == "true") {
-                    setcookie("KivoText-loginID", $res["id"], time() + 60 * 60 * 24 * 7);
+                    // COOKIE设置:已被移除
                 } else {
-                    setcookie("KivoText-loginID", $res["id"], time() + 60 * 60 * 24);
+                    // COOKIE设置:已被移除
                 }
                 echo "login.success";
             }
             break;
         case "request-info":
-            mysqli_query($con, "UPDATE `users` SET `lastonlinetime` = CURRENT_TIMESTAMP() WHERE `id` = " . $_REQUEST["id"]);
-            $queryArr = mysqli_fetch_assoc(mysqli_query($con, "SELECT * FROM `accessinfo` WHERE `id` = " . $_REQUEST["id"]));
-            $queryArr2 = mysqli_fetch_assoc(mysqli_query($con, "SELECT * FROM `users` WHERE `id` = " . $_REQUEST["id"]));
-            $resultArr = mysqli_fetch_all(mysqli_query($con, "SELECT `id`,`name`,`lastmodifiedtime`,`ownerid` FROM `files` WHERE ownerid = " . $_REQUEST["id"]), MYSQLI_ASSOC);
+            mysqli_query($con, "UPDATE `users` SET `lastonlinetime` = CURRENT_TIMESTAMP() WHERE `id` = " . $reqID);
+            $queryArr = mysqli_fetch_assoc(mysqli_query($con, "SELECT * FROM `accessinfo` WHERE `id` = " . $reqID));
+            $queryArr2 = mysqli_fetch_assoc(mysqli_query($con, "SELECT * FROM `users` WHERE `id` = " . $reqID));
+            $resultArr = mysqli_fetch_all(mysqli_query($con, "SELECT `id`,`name`,`lastmodifiedtime`,length(CONVERT(DES_DECRYPT(`content`,'" . mysqli_escape_string($con, constant("encrypt-key")) . "') USING utf8mb4)) AS `filesize` FROM `files` WHERE ownerid = " . $reqID), MYSQLI_ASSOC);
             foreach ($resultArr as $key => $value) {
                 $resultArr[$key] = array_merge($resultArr[$key], mysqli_fetch_assoc(mysqli_query($con, "SELECT * FROM `sharedinfo` WHERE `fileid` = " . $value["id"])));
             }
-            echo "result:", json_encode([
+            echo json_encode([
                 "userinfo" => $queryArr2,
                 "needrelogin" => $queryArr2["lastloginIP"] != getRemoteIP(),
                 "constants" => [
@@ -112,21 +115,20 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             break;
         case "change-password":
             if (mysqli_fetch_assoc(mysqli_query($con, "SELECT * FROM `users` WHERE `name` = '" . mysqli_escape_string($con, $_REQUEST["name"]) . "'"))["password"] == $_REQUEST["oldpasswordENC"]) {
-                mysqli_query($con, "UPDATE `users` SET `password` = '" . $_REQUEST["newpasswordENC"] . "' WHERE `id` = " . $_REQUEST["id"]);
+                mysqli_query($con, "UPDATE `users` SET `password` = '" . $_REQUEST["newpasswordENC"] . "' WHERE `id` = " . $reqID);
                 echo "changePassword.success";
             } else {
                 echo "changePassword.error.passwordNotSame";
             }
         case "delete-account":
-            setcookie("KivoText-loginID", "", time() - 3600);
-            mysqli_query($con, "DELETE FROM `files` WHERE `ownerid` = " . $_REQUEST["id"]);
-            mysqli_query($con, "DELETE FROM `readsharedfilelog` WHERE `userid` = " . $_REQUEST["id"]);
-            mysqli_query($con, "DELETE FROM `accessinfo` WHERE `id` = " . $_REQUEST["id"]);
-            mysqli_query($con, "DELETE FROM `users` WHERE `id` = " . $_REQUEST["id"]);
+            // COOKIE设置:已被移除
+            mysqli_query($con, "DELETE FROM `files` WHERE `ownerid` = " . $reqID);
+            mysqli_query($con, "DELETE FROM `readsharedfilelog` WHERE `userid` = " . $reqID);
+            mysqli_query($con, "DELETE FROM `accessinfo` WHERE `id` = " . $reqID);
+            mysqli_query($con, "DELETE FROM `users` WHERE `id` = " . $reqID);
             echo "deleteAccount.success";
             break;
         case "read-file":
-            echo "result:";
             echo json_encode([
                 "fileinfo" =>
                 mysqli_fetch_assoc(mysqli_query(
@@ -159,7 +161,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             echo "renameFile.success";
             break;
         case "create-file":
-            mysqli_query($con, "INSERT INTO `files` VALUES (NULL,'" . mysqli_escape_string($con, urldecode($_REQUEST["filename"])) . "'," . $_REQUEST["id"] . ",'',CURRENT_TIMESTAMP())");
+            mysqli_query($con, "INSERT INTO `files` VALUES (NULL,'" . mysqli_escape_string($con, urldecode($_REQUEST["filename"])) . "'," . $reqID . ",'',CURRENT_TIMESTAMP())");
             createSharedRecord(mysqli_insert_id($con));
             echo "createFile.success";
             break;
@@ -172,7 +174,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             if (mysqli_num_rows(mysqli_query($con, "SELECT * FROM `users` WHERE `name` = '" . mysqli_escape_string($con, $_REQUEST["newusername"]) . "'")) > 0) {
                 echo "changeUserName.error.alreadyExists";
             } else {
-                mysqli_query($con, "UPDATE `users` SET `name` = '" . mysqli_escape_string($con, $_REQUEST["newusername"]) . "' WHERE id = " . $_REQUEST["id"]);
+                mysqli_query($con, "UPDATE `users` SET `name` = '" . mysqli_escape_string($con, $_REQUEST["newusername"]) . "' WHERE id = " . $reqID);
                 echo "changeUserName.success";
             }
             break;
@@ -182,7 +184,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             echo "copyFile.success";
             break;
         case "upload-file":
-            mysqli_query($con, "INSERT INTO `files` VALUES (NULL,'" . mysqli_escape_string($con, urldecode($_REQUEST["filename"])) . "'," . $_REQUEST["id"] . ",DES_ENCRYPT('" . mysqli_escape_string($con, urldecode($_REQUEST["filecontent"])) . "','" . mysqli_escape_string($con, constant("encrypt-key")) . "'),CURRENT_TIMESTAMP())");
+            mysqli_query($con, "INSERT INTO `files` VALUES (NULL,'" . mysqli_escape_string($con, urldecode($_REQUEST["filename"])) . "'," . $reqID . ",DES_ENCRYPT('" . mysqli_escape_string($con, urldecode($_REQUEST["filecontent"])) . "','" . mysqli_escape_string($con, constant("encrypt-key")) . "'),CURRENT_TIMESTAMP())");
             createSharedRecord(mysqli_insert_id($con));
             echo "uploadFile.success";
             break;
@@ -190,22 +192,25 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             mysqli_query($con, "UPDATE `sharedinfo` SET avaliable = " . ($_REQUEST["method"] == "on" ? "1" : "0") . " WHERE fileid = " . $_REQUEST["fileid"]);
             break;
         case "open-shared-file":
-            echo "result:";
             if (mysqli_num_rows(mysqli_query($con, "SELECT * FROM `sharedinfo` WHERE `sharecode` = '" . mysqli_escape_string($con, strtoupper($_REQUEST["sharecode"])) . "'")) == 0) {
-                echo "openSharedFile.error.shareCodeErrorOrShareIsClosed";
+                echo json_encode([
+                    "status" => "error.shareCodeErrorOrShareIsClosed"
+                ]);
             } else {
                 $queryArr1 = mysqli_fetch_assoc(mysqli_query($con, "SELECT * FROM `sharedinfo` WHERE `sharecode` = '" . mysqli_escape_string($con, $_REQUEST["sharecode"]) . "'"));
                 if ($queryArr1["avaliable"] == 0) {
-                    echo "openSharedFile.error.shareCodeErrorOrShareIsClosed";
+                    echo json_encode([
+                        "status" => "error.shareCodeErrorOrShareIsClosed"
+                    ]);
                 } else {
                     $queryArr2 = mysqli_fetch_assoc(mysqli_query($con, "SELECT `id`,`name`,`ownerid`,CONVERT(DES_DECRYPT(`content`,'" . mysqli_escape_string($con, constant("encrypt-key")) . "') USING utf8mb4) AS `content`,`lastmodifiedtime` FROM `files` WHERE `id` = " . $queryArr1["fileid"]));
                     if ($queryArr2) {
-                        if (mysqli_num_rows(mysqli_query($con, "SELECT * FROM `readsharedfilelog` WHERE `fileid` = " . $queryArr1["fileid"] . " AND `userid` = " . $_REQUEST["id"])) == 0) {
+                        if (mysqli_num_rows(mysqli_query($con, "SELECT * FROM `readsharedfilelog` WHERE `fileid` = " . $queryArr1["fileid"] . " AND `userid` = " . $reqID)) == 0) {
                             // 未打开过
-                            mysqli_query($con, "INSERT INTO `readsharedfilelog` VALUES (NULL," . $_REQUEST["id"] . "," . $queryArr1["fileid"] . ",CURRENT_TIMESTAMP(),NULL)");
+                            mysqli_query($con, "INSERT INTO `readsharedfilelog` VALUES (NULL," . $reqID . "," . $queryArr1["fileid"] . ",CURRENT_TIMESTAMP(),NULL)");
                         }
-                        echo "result:";
                         echo json_encode([
+                            "status" => "success",
                             "name" => $queryArr2["name"],
                             "fileid" => $queryArr1["fileid"],
                             "ownername" => maskString(mysqli_fetch_assoc(mysqli_query($con, "SELECT * FROM `users` WHERE id = " . $queryArr2["ownerid"]))["name"]),
@@ -220,7 +225,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             }
             break;
         case "resave-shared-file":
-            mysqli_query($con, "INSERT INTO `files` SELECT NULL,'" . mysqli_escape_string($con, $_REQUEST["newname"]) . "'," . $_REQUEST["id"] . ",`content`,CURRENT_TIMESTAMP() FROM `files` WHERE id = " . $_REQUEST["fileid"]);
+            mysqli_query($con, "INSERT INTO `files` SELECT NULL,'" . mysqli_escape_string($con, $_REQUEST["newname"]) . "'," . $reqID . ",`content`,CURRENT_TIMESTAMP() FROM `files` WHERE id = " . $_REQUEST["fileid"]);
             createSharedRecord(mysqli_insert_id($con));
             echo "resaveFile.success";
             break;

@@ -1,5 +1,5 @@
 function getBytes(string) {
-    return (string.match(/[^\n]/g) ? string.match(/[^\n]/g).length : 0) + (string.match(/[\u4e00-\u9fa5]/g) ? string.match(/[\u4e00-\u9fa5]/g).length : 0) * 3
+    return (string.match(/[^\n]/g) ? string.match(/[^\n]/g).length : 0) + (string.match(/[\u4e00-\u9fa5]/g) ? string.match(/[\u4e00-\u9fa5]/g).length : 0) * 2;
 }
 
 function checkServer(status, freq) {
@@ -55,7 +55,7 @@ function showMessage(text, state) {
         ${text}
         <small>${new Date().toLocaleTimeString("zh-CN")}</small></div>
     </div>
-    <div class='message-background-shader'></div>
+    <div></div>
     `;
     messageObj.style.opacity = 0;
     document.body.appendChild(messageObj);
@@ -97,7 +97,7 @@ function getCookie(name) {
 }
 
 
-function sendRequest(args, callback, result = true) {
+function sendRequest(args, callback, jsonData = true, withToken = true) {
     var xmlhttp;
     if (window.XMLHttpRequest) {
         // IE7+, Firefox, Chrome, Opera, Safari 浏览器执行代码
@@ -107,12 +107,12 @@ function sendRequest(args, callback, result = true) {
         // IE6, IE5 浏览器执行代码
         xmlhttp = new ActiveXObject("Microsoft.XMLHTTP");
     }
-    xmlhttp.onreadystatechange = function () {
+    xmlhttp.onreadystatechange = () => {
         if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
             if (typeof callback == "function") {
                 // console.log(xmlhttp.responseText);
-                if (result) {
-                    callback(xmlhttp.responseText.slice(7));
+                if (jsonData) {
+                    callback(JSON.parse(xmlhttp.responseText));
                 } else {
                     callback(xmlhttp.responseText);
                 }
@@ -121,7 +121,7 @@ function sendRequest(args, callback, result = true) {
             }
         }
     }
-    xmlhttp.open("POST", "process.php?id=" + getCookie("KivoText-loginID") + "&" + args, true);
+    xmlhttp.open("POST", 'process.php?' + (withToken ? `tokenusername=${localStorage.getItem("KivoText-username")}&tokenpassword=${localStorage.getItem("KivoText-username")}&` : '') + args, true);
     xmlhttp.send();
 }
 
@@ -130,7 +130,7 @@ function openPopup(name) {
     document.getElementById("popup-border").style.display = "block";
     for (const each of document.getElementsByClassName("pop-content")) {
         each.style.display = "none";
-        if (each.getAttribute("type") == name) {
+        if (each.dataset.type == name) {
             each.style.display = "block";
         }
     }
@@ -186,10 +186,10 @@ function textStatic() {
     const sharedChars = getBytes(document.getElementById("shared-file-text-editor").value);
     document.getElementById("text-static-table").getElementsByTagName("b")[4].innerText = chars;
     document.getElementById("current-file-length-label").innerText = chars;
-    document.getElementById("file-left-length-label").innerText = (fileLengthLimit === null ? "无限制" : (fileLengthLimit == -1 ? "只读模式" : fileLengthLimit - chars));
-    if (fileLengthLimit - chars < 0 && fileLengthLimit !== null) {
+    document.getElementById("file-left-length-label").innerText = (config.fileLengthLimit === null ? "无限制" : (config.fileLengthLimit == -1 ? "只读模式" : config.fileLengthLimit - chars));
+    if (config.fileLengthLimit - chars < 0 && config.fileLengthLimit !== null) {
         document.getElementById("file-left-length-label").className = "red-text";
-    } else if (fileLengthLimit - chars < 100 && fileLengthLimit !== null) {
+    } else if (config.fileLengthLimit - chars < 100 && config.fileLengthLimit !== null) {
         document.getElementById("file-left-length-label").className = "yellow-text";
     } else {
         document.getElementById("file-left-length-label").className = "green-text";
@@ -235,11 +235,6 @@ function loadingAnimationInPopup(flag) {
 }
 
 function setStyle() {
-    function turnFont(ele) {
-        ele.style.fontFamily = document.getElementById("font-selector").value.split(",")[0];
-        ele.style.fontWeight = document.getElementById("font-selector").value.split(",")[1];
-    }
-
     for (const each of themes) {
         if (each.label == document.getElementById("theme-selector").value) {
             for (const cssVar in each.cssVars) {
@@ -251,21 +246,11 @@ function setStyle() {
             }
         }
     }
-    document.cookie = "KivoText-preferTheme=" + document.getElementById("theme-selector").value + "; max-age=" + new Date(new Date().getTime() + 3600000 * 24 * 7).toUTCString();
+    document.cookie = "KivoText-preferTheme=" + document.getElementById("theme-selector").value + "; max-age=" + (86400 * 7);
+    document.cookie = "KivoText-preferFont=" + document.getElementById("font-selector").value + "; max-age=" + (86400 * 7);
 
-    document.body.getElementsByTagName("main")[0].style.fontFamily = document.getElementById("font-selector").value.split(",")[0];
-    document.body.getElementsByTagName("main")[0].style.fontWeight = document.getElementById("font-selector").value.split(",")[1];
-    document.cookie = "KivoText-preferFont=" + document.getElementById("font-selector").value + "; max-age=" + new Date(new Date().getTime() + 3600000 * 24 * 7).toUTCString();
+    document.body.style.fontFamily = document.getElementById("font-selector").value;
 
-    for (const iterator of document.getElementsByTagName("button")) {
-        turnFont(iterator);
-    }
-    for (const iterator of document.getElementsByTagName("input")) {
-        turnFont(iterator);
-    }
-    for (const iterator of document.getElementsByTagName("select")) {
-        turnFont(iterator);
-    }
 }
 
 function fade(ele, inOrOut = true, time = 30, entire = false) {
@@ -306,4 +291,8 @@ function getFileNameById(id) {
             return each.getElementsByClassName("file-name")[0].innerText;
         }
     }
+}
+
+function isLogined() {
+    return localStorage.getItem("KivoText-username") && localStorage.getItem("KivoText-encpassword");
 }

@@ -23,6 +23,10 @@
     --button-active-color: rgb(206, 222, 253);
 }
 
+body {
+    font-family: "MiSans";
+}
+
 a {
     text-decoration: none;
     background-color: var(--medium-bg);
@@ -37,9 +41,9 @@ a:hover {
 }
 
 button {
+    font-family: inherit;
     color: var(--default-btn-color);
     background-color: var(--default-btn-bg);
-    font-family: initial;
     border: none;
     border-bottom: 1px solid black;
     padding: 3px 6px;
@@ -68,17 +72,25 @@ header {
     margin-bottom: 10px;
 }
 
+input[type=checkbox] {
+    width: 18px;
+    height: 18px;
+    vertical-align: middle;
+}
+
 input:not(input[type=file]) {
+    font-family: inherit;
     border: none;
     border-radius: 5px;
     padding: 3px;
     border-bottom: 1px solid gray;
+    transition-duration: .1s;
 }
 
 input:not(input[type=file]):focus {
     outline: none;
-    border: 1px solid black;
-    background-color: azure;
+    border-bottom: 1px solid black;
+    background-color: rgb(230, 250, 250);
 }
 
 @keyframes fillBackground {
@@ -89,4 +101,15 @@ input:not(input[type=file]):focus {
     100% {
         width: 100%;
     }
+}
+
+code {
+    background-color: var(--medium-bg);
+    padding: 3px;
+    border-radius: 3px;
+}
+
+select {
+    font-family: inherit;
+    font-size: medium;
 }

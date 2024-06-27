@@ -3,18 +3,12 @@
 }
 
 body {
-    background: linear-gradient(to bottom, #fff1c3, #ffdfb4) fixed;
+    background: linear-gradient(to bottom, #e3b6f8, #cacff8) fixed;
 }
 
 input[type=text],
 input[type=password] {
     width: 150px;
-}
-
-input[type=checkbox] {
-    width: 18px;
-    height: 18px;
-    vertical-align: bottom;
 }
 
 main {
@@ -55,7 +49,9 @@ tr td:last-child {
     text-align: left;
 }
 
-.red {
+tr td.red-err {
+    text-align: center;
+    font-size: small;
     color: red;
 }
 
@@ -72,6 +68,8 @@ tr td:last-child {
 #return-button,
 #process-button {
     font-size: large;
+    font-weight: bold;
+    margin-top: 15px;
     padding: 5px;
     padding-left: 20px;
     padding-right: 20px;
