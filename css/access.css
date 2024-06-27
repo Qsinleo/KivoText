@@ -110,7 +110,7 @@ tr td.red-err {
 }
 
 #options-box>span:hover {
-    background-color: var(--yellow-color);
+    background-color: var(--yellow);
 }
 
 .titler {

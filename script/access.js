@@ -87,7 +87,7 @@ for (let index = 0; index < document.getElementById("options-box").childElementC
         }
         document.getElementById("name-error").innerText = "";
         document.getElementById("password-error").innerText = "";
-        iterator.style.backgroundColor = "var(--high-light-color)";
+        iterator.style.backgroundColor = "var(--highlight)";
     });
 }
 {
@@ -96,7 +96,7 @@ for (let index = 0; index < document.getElementById("options-box").childElementC
     for (const iterator1 of document.getElementById("options-box").children) {
         iterator1.style.backgroundColor = "";
     }
-    iterator.style.backgroundColor = "var(--high-light-color)";
+    iterator.style.backgroundColor = "var(--highlight)";
 }
 document.getElementById("return-button").addEventListener("click", () => {
     location.href = "index.html";

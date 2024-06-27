@@ -53,7 +53,6 @@ function operationOfFiles(type, fileid) {
                 showMessage("保存失败：文件属于共享状态，无法对共享文件编辑！请先关闭共享再保存。");
                 break;
             }
-
             if (getFileStatus("is-short-to-save")) {
                 showMessage("保存失败：文件内容长度超出了限制！可在“权限查看”页面确认权限。");
                 break;
@@ -77,7 +76,7 @@ function operationOfFiles(type, fileid) {
             document.getElementById("file-opened-area").style.display = "none";
             document.getElementById("file-not-open-hint").style.display = "block";
             for (const each of document.getElementsByClassName("file-label")) {
-                if (each.getAttribute("fileID") == fileid) {
+                if (each.dataset.fileid == fileid) {
                     each.style.removeProperty("background-color");
                 }
                 each.getElementsByClassName("open-file-button")[0].disabled = "";
@@ -223,6 +222,7 @@ function operationOfFiles(type, fileid) {
                 } else {
                     document.getElementById("request-shared-file-status-label").innerText = "文件打开成功";
                     document.getElementById("request-shared-file-status-label").className = "green";
+                    document.getElementById("shared-file-viewbox").style.display = "block";
                     document.getElementById("shared-file-info").getElementsByTagName("span")[0].innerText = response.name;
                     document.getElementById("shared-file-info").getElementsByTagName("span")[1].innerText = response.fileid;
                     document.getElementById("shared-file-info").getElementsByTagName("span")[2].innerText = response.lastmodifiedtime;
@@ -240,14 +240,8 @@ function operationOfFiles(type, fileid) {
             break;
         case "close-shared-file":
             document.getElementById("request-shared-file-status-label").innerText = "等待共享码";
-            document.getElementById("request-shared-file-status-label").className = "";
-            document.getElementById("shared-file-info").getElementsByTagName("span")[0].innerText = "--";
-            document.getElementById("shared-file-info").getElementsByTagName("span")[1].innerText = "--";
-            document.getElementById("shared-file-info").getElementsByTagName("span")[2].innerText = "----.--.-- --:--:--";
-            document.getElementById("shared-file-info").getElementsByTagName("span")[3].innerText = "--";
-            document.getElementById("shared-file-info").getElementsByTagName("span")[4].innerText = "--";
-            document.getElementById("shared-file-text-editor").value = "";
-            document.getElementById("shared-file-text-editor").disabled = "disabled";
+            document.getElementById("request-shared-file-status-label").className = "blue";
+            document.getElementById("shared-file-viewbox").style.display = "none";
             for (const each of document.getElementById("shared-file-operator").getElementsByTagName("button")) {
                 each.disabled = "disabled";
             }
@@ -277,7 +271,7 @@ function operationOfFiles(type, fileid) {
             }
             sendRequest("type=resave-shared-file&fileid=" + document.getElementById("shared-file-info").getElementsByTagName("span")[1].innerText + "&newname=" + encodeURIComponent(askName ? askName : document.getElementById("shared-file-info").getElementsByTagName("span")[0].innerText), (response) => {
                 loadUserInfo(() => {
-                    showMessage("转存文件至" + askName + "成功");
+                    showMessage("转存文件成功");
                     for (const each of document.getElementById("shared-file-operator").getElementsByTagName("button")) {
                         each.disabled = "";
                     }
@@ -353,6 +347,7 @@ function loadUserInfo(callback = {}) {
         }
 
         // 加载文件
+        document.getElementById("search-result-label").innerText = "";
         document.getElementById("file-list").innerHTML = "";
         document.getElementById("total-files-label").innerText = response.files.length;
         if (response.files.length > 0) {
@@ -360,12 +355,13 @@ function loadUserInfo(callback = {}) {
             for (const each of response.files) {
                 let fileObj = document.createElement("div");
                 fileObj.className = "file-label";
+                fileObj.dataset.filesize = each.filesize;
                 fileObj.innerHTML = `<div><input type="checkbox" class="file-select-checkbox" />\
             <small>${order++}</small>
             <span class="file-name" title="ID:${each.id}">${each.name}</span>
             ${(each.avaliable == "1" ? '<span class="shared-file-icon">已共享</span>' : '')}</div>
             <div><button class="open-file-meta-button">属性</button><button class="open-file-button">打开</button></div>`;
-                fileObj.setAttribute("fileID", each.id);
+                fileObj.dataset.fileid = each.id;
                 document.getElementById("file-list").appendChild(fileObj);
                 fileObj.getElementsByClassName("open-file-button")[0].onclick = () => {
                     operationOfFiles("open-file", each.id);
@@ -383,9 +379,9 @@ function loadUserInfo(callback = {}) {
             }
             document.getElementById("files-operator-list").style.display = "block";
             for (const each of document.getElementsByClassName("file-label")) {
-                if (each.getAttribute("fileID") == document.getElementById("file-info").getElementsByTagName("span")[1].innerText && getFileStatus("is-open")) {
+                if (each.dataset.fileid == document.getElementById("file-info").getElementsByTagName("span")[1].innerText && getFileStatus("is-open")) {
                     each.getElementsByClassName("open-file-button")[0].disabled = "disabled";
-                    each.style.backgroundColor = "var(--high-light-color)";
+                    each.style.backgroundColor = "var(--highlight)";
                 } else {
                     each.style.removeProperty("background-color");
                 }
@@ -416,8 +412,9 @@ function loadFileMeta(callback = {}, changeTextarea = false, fileid = document.g
     sendRequest("type=read-file&fileid=" + fileid, (response) => {
         loadingAnimation(false);
         for (const each of document.getElementsByClassName("file-label")) {
-            if (each.getAttribute("fileID") == fileid) {
-                each.style.backgroundColor = "var(--high-light-color)";
+            if (each.dataset.fileid == fileid) {
+                each.style.backgroundColor = "var(--highlight)";
+
                 each.getElementsByClassName("open-file-button")[0].disabled = "disabled";
             } else {
                 each.style.removeProperty("background-color");

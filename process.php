@@ -190,6 +190,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             break;
         case "change-shared-status":
             mysqli_query($con, "UPDATE `sharedinfo` SET avaliable = " . ($_REQUEST["method"] == "on" ? "1" : "0") . " WHERE fileid = " . $_REQUEST["fileid"]);
+            echo "changeSharedStatus.success";
             break;
         case "open-shared-file":
             if (mysqli_num_rows(mysqli_query($con, "SELECT * FROM `sharedinfo` WHERE `sharecode` = '" . mysqli_escape_string($con, strtoupper($_REQUEST["sharecode"])) . "'")) == 0) {

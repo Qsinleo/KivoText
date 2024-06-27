@@ -18,9 +18,8 @@
 				<div><small>正在加载<span id="now-loading-content">DOMContent</span></small></div>
 				<p>欢迎来到<b>KivoText</b>！</p>
 			</div>
-			<div id="popup-shade"></div>
+			<div id="popup-shader"></div>
 			<div id="popup-border">
-
 				<div>
 					<div class="pop-content" data-type="more-account-settings">
 						<h2>账号操作</h2>
@@ -125,40 +124,41 @@
 							</div>
 						</div>
 						<button id="read-shared-file-button">读取</button>
-
 						<div class="open-shared-file-status center">
 							文件状态 <span id="request-shared-file-status-label">等待共享码</span>
 						</div>
-						<div class="separator">查看文件内容</div>
-						<div id="shared-file-info" class="center">
-							<small>名称</small>
-							<span class="strong"></span>
-							<small>ID</small>
-							<span></span>
-							<small>最后更改</small>
-							<span></span>
-							<small>持有人</small>
-							<span></span>
-							<small>阅览次数</small>
-							<span></span>
+						<div id="shared-file-viewbox">
+							<div class="separator">查看文件内容</div>
+							<div id="shared-file-info" class="center">
+								<small>名称</small>
+								<span class="strong"></span>
+								<small>ID</small>
+								<span></span>
+								<small>最后更改</small>
+								<span></span>
+								<small>持有人</small>
+								<span></span>
+								<small>阅览次数</small>
+								<span></span>
+							</div>
+							<div id="shared-file-operator" class="center">
+								<button id="close-shared-file-button">关闭文件</button>
+								<button id="copy-shared-file-button">一键复制</button>
+								<button id="download-shared-file-button">下载</button>
+								<button id="resave-shared-file-button">转存</button>
+								<select>
+									<option value="12">12px</option>
+									<option value="14">14px</option>
+									<option value="16" selected>16px</option>
+									<option value="18">18px</option>
+									<option value="20">20px</option>
+									<option value="24">24px</option>
+									<option value="30">30px</option>
+								</select>
+							</div>
+							<textarea id="shared-file-text-editor" readonly></textarea>
 						</div>
-						<div id="shared-file-operator" class="center">
-							<button id="close-shared-file-button">关闭文件</button>
-							<button id="copy-shared-file-button">一键复制</button>
-							<button id="download-shared-file-button">下载</button>
-							<button id="resave-shared-file-button">转存</button>
-							<br>
-							<select>
-								<option value="12">12px</option>
-								<option value="14">14px</option>
-								<option value="16" selected>16px</option>
-								<option value="18">18px</option>
-								<option value="20">20px</option>
-								<option value="24">24px</option>
-								<option value="30">30px</option>
-							</select>
-						</div>
-						<textarea id="shared-file-text-editor" readonly></textarea>
+
 					</div>
 					<div class="pop-content" data-type="theme-selector">
 						<h2>主题设置</h2>
@@ -167,7 +167,7 @@
 						<select id="font-selector">
 							<option value="MiSans">MiSans</option>
 							<option value="unset">默认字体</option>
-							<option disabled>字重调节已被移除</option>
+							<option disabled>字重调节不可用</option>
 						</select>
 						<div class="separator">主题选择</div>
 						<label>选择<select id="theme-selector">
@@ -262,19 +262,18 @@
 					关闭 & 返回
 				</div>
 			</div>
-
 			<div class="top-banner">
 				<div class="title center">KivoText</div>
 				<div id="login-info">
 					<div><b>登录信息</b></div>
 					<div id="login-info-menu">
-						名称 ID:<span class="user-id-label"></span><br>
+						我的账号 ID:<span class="user-id-label"></span><br>
 						<span class="user-name-label"></span>
 						<hr>
 						<small>
-							上次在线时间<br>
+							<b>上次在线时间</b><br>
 							<span id="last-online-time-label"></span><br>
-							登录IP<br>
+							<b>登录IP</b><br>
 							<span id="login-ip-label"></span>
 						</small>
 						<a id="more-account-settings-link">账号操作</a>
@@ -282,8 +281,6 @@
 					</div>
 				</div>
 			</div>
-
-
 
 			</div>
 			<div id="need-login" class="center">
@@ -297,27 +294,22 @@
 				<div class="editor">
 					<div class="file-explorer">
 						<div>
-							<div>
-								<header>
-									文件列表<button id="refresh-files-button">刷新</button>
-									<button id="show-user-meta-button">用户信息</button>
-								</header>
-								<button class="blue" id="create-new-file-button">创建新文件</button>
-								<button class="green" id="upload-files-link">上传文件</button>
-								<!-- <b>搜索文件</b><input type="text"
-									id="search-file-input" /><button id="search-file-button">搜索</button><button
-									id="show-all-files-button">关闭搜索</button> -->
-							</div>
-
-							共<b id="total-files-label"></b>个文件
-
+							<header>
+								文件列表<button id="refresh-files-button">刷新</button>
+								<button id="show-user-meta-button">用户信息</button>
+							</header>
+							<button class="blue" id="create-new-file-button">创建新文件</button>
+							<button class="green" id="upload-files-link">上传文件</button>
+						</div>
+						<div class="file-count-info">
+							<span>共<b id="total-files-label"></b>个文件</span>
+							<span id="search-result-label"></span>
 						</div>
 						<div id="file-list">
 							<!-- There should be something. -->
 						</div>
-
 						<div class="multi-operation">
-							<div class="strong">文件(批量)操作</div>
+							<div class="strong">文件选项</div>
 							<div>
 								已选<b id="has-selected-file-count-label">0</b>个文件&nbsp;
 								<button id="select-all-file-button">全部选择</button>
@@ -331,6 +323,29 @@
 								<button class="red-text file-operator-button" id="delete-file-button">删除</button>
 								<label><input type="checkbox" id="multi-operation-no-ask-again" />一次性完成操作</label>
 							</div>
+							<div class="strong">筛选文件</div>
+							<div>
+								<label>名称
+									<select id="search-file-name-method">
+										<option value="include" selected>包含</option>
+										<option value="equal">等于</option>
+										<option value="exclude">不包含</option>
+									</select>
+									<input type="text" id="search-file-name-input" placeholder="留空不设限" /></label>
+							</div>
+							<div>
+								<label>
+									文件大小
+									<select id="search-file-size-select">
+										<option value="no-limit">无限制</option>
+										<option value="empty">空</option>
+										<option value="1000-">1~1000字节</option>
+										<option value="1000+">1000字节以上</option>
+									</select>
+								</label>
+							</div>
+							<button id="search-file-button">筛选</button>
+							<small>点击“刷新”取消筛选</small>
 						</div>
 					</div>
 					<div class="editor-area">
@@ -340,7 +355,7 @@
 						</header>
 						<div id="file-not-open-hint" class="center">
 							<h3>没有打开的文件✨</h3>
-							<small>可在左侧选择文件打开</small>
+							<small>可选择文件打开</small>
 						</div>
 						<div id="file-opened-area">
 							<div id="file-info" class="center">
@@ -506,7 +521,7 @@
 					<button id="download-apk-link">下载客户端</button>
 					<button id="theme-selector-link">主题设置</button>
 				</div>
-				Version 1.1.0 <a href="about.html">ABOUT Page</a>
+				Version 1.1.1 <a href="about.html">ABOUT Page</a>
 			</footer>
 		</main>
 	</body>

@@ -51,7 +51,7 @@ function showMessage(text, state) {
     messageObj.classList = ["message-display"];
     messageObj.innerHTML = `
     <div>
-        <div>✅
+        <div>ℹ
         ${text}
         <small>${new Date().toLocaleTimeString("zh-CN")}</small></div>
     </div>
@@ -112,7 +112,11 @@ function sendRequest(args, callback, jsonData = true, withToken = true) {
             if (typeof callback == "function") {
                 // console.log(xmlhttp.responseText);
                 if (jsonData) {
-                    callback(JSON.parse(xmlhttp.responseText));
+                    try {
+                        callback(JSON.parse(xmlhttp.responseText));
+                    } catch (error) {
+                        console.log(error, xmlhttp.responseText);
+                    }
                 } else {
                     callback(xmlhttp.responseText);
                 }
@@ -126,7 +130,7 @@ function sendRequest(args, callback, jsonData = true, withToken = true) {
 }
 
 function openPopup(name) {
-    document.getElementById("popup-shade").style.display = "block";
+    document.getElementById("popup-shader").style.display = "block";
     document.getElementById("popup-border").style.display = "block";
     for (const each of document.getElementsByClassName("pop-content")) {
         each.style.display = "none";
@@ -287,7 +291,7 @@ function fade(ele, inOrOut = true, time = 30, entire = false) {
 
 function getFileNameById(id) {
     for (const each of document.getElementsByClassName("file-label")) {
-        if (each.getAttribute("fileID") == id) {
+        if (each.dataset.fileid == id) {
             return each.getElementsByClassName("file-name")[0].innerText;
         }
     }

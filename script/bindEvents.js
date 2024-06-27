@@ -71,7 +71,7 @@ function bindEvents(logined) {
 
     document.getElementById("close-hint").addEventListener("click", () => {
         document.getElementById("popup-border").style.display = "none";
-        document.getElementById("popup-shade").style.display = "none";
+        document.getElementById("popup-shader").style.display = "none";
     })
     if (logined) {
         document.getElementById("login-info").addEventListener("mouseenter", () => {
@@ -387,16 +387,16 @@ function bindEvents(logined) {
             for (const each of document.getElementById("file-track-labels").children) {
                 let tempcount = count;
                 each.addEventListener("click", () => {
-                    if (each.style.backgroundColor == "var(--high-light-color)") {
-                        each.style.backgroundColor = "var(--light-blue-color)";
+                    if (each.style.backgroundColor == "var(--highlight)") {
+                        each.style.backgroundColor = "var(--light-blue)";
                         each.style.width = "initial";
                         document.getElementById("file-track-contents").children[tempcount].style.display = "none";
                     } else {
                         for (const item of document.getElementById("file-track-labels").children) {
-                            item.style.backgroundColor = "var(--light-blue-color)";
+                            item.style.backgroundColor = "var(--light-blue)";
                             item.style.width = "initial";
                         }
-                        each.style.backgroundColor = "var(--high-light-color)";
+                        each.style.backgroundColor = "var(--highlight)";
                         each.style.width = "120px";
                         for (const item of document.getElementById("file-track-contents").children) {
                             item.style.display = "none";
@@ -445,7 +445,7 @@ function bindEvents(logined) {
                             showMessage("切换共享状态成功！");
                         })
                     });
-                }, true);
+                }, false);
             });
             document.getElementById("copy-share-code-button").addEventListener("click", () => {
                 navigator.clipboard.writeText(document.getElementById("share-code-label").innerText).then(() => {
@@ -508,7 +508,7 @@ function bindEvents(logined) {
                 let result = [];
                 for (const each of document.getElementsByClassName("file-label")) {
                     if (each.getElementsByClassName("file-select-checkbox")[0].checked) {
-                        result.push(each.getAttribute("fileID"))
+                        result.push(each.dataset.fileid)
                     }
                 }
                 return result;
@@ -590,5 +590,39 @@ function bindEvents(logined) {
                 }
             });
         }//文件操作
+
+        {
+            document.getElementById("search-file-button").addEventListener("click", () => {
+                let matchCount = document.getElementsByClassName("file-label").length;
+                for (const iterator of document.getElementsByClassName("file-label")) {
+                    iterator.style.display = "";
+                }
+                for (const iterator of document.getElementsByClassName("file-label")) {
+                    function test(obj) {
+                        if (!obj && iterator.style.display != "none") {
+                            matchCount--;
+                            iterator.style.display = "none";
+                        }
+                    }
+
+                    test((document.getElementById("search-file-name-input").value == "") || ((
+                        document.getElementById("search-file-name-method").value == "include" && iterator.getElementsByClassName("file-name")[0].innerText.indexOf(document.getElementById("search-file-name-input").value) != -1
+                    ) || (
+                            document.getElementById("search-file-name-method").value == "equal" && iterator.getElementsByClassName("file-name")[0].innerText == document.getElementById("search-file-name-input").value
+                        ) || (
+                            document.getElementById("search-file-name-method").value == "exclude" && iterator.getElementsByClassName("file-name")[0].innerText.indexOf(document.getElementById("search-file-name-input").value) == -1
+                        ))
+                    );
+                    test(document.getElementById("search-file-size-select").value == "no-limit" ||
+                        (document.getElementById("search-file-size-select").value == "empty" && iterator.dataset.filesize == 0) ||
+                        (document.getElementById("search-file-size-select").value == "1000-" && iterator.dataset.filesize > 0 && iterator.dataset.filesize <= 1000) ||
+                        (document.getElementById("search-file-size-select").value == "1000+" && iterator.dataset.filesize >= 1000)
+                    );
+                }
+                if (document.getElementById("search-file-name-input").value || document.getElementById("search-file-size-select").value != "no-limit") {
+                    document.getElementById("search-result-label").innerText = `筛选共${matchCount}个`;
+                }
+            });
+        }//搜索文件
     }
 }//绑定事件

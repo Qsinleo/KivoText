@@ -59,35 +59,35 @@ footer .right button {
 }
 
 .red {
-    color: var(--red-color);
-    background-color: var(--light-red-color);
+    color: var(--red);
+    background-color: var(--light-red);
 }
 
 .red-text {
-    color: var(--red-color);
+    color: var(--red);
 }
 
 .blue {
-    color: var(--dark-blue-color);
-    background-color: var(--light-blue-color);
+    color: var(--dark-blue);
+    background-color: var(--light-blue);
 }
 
 .green {
-    color: var(--green-color);
-    background-color: var(--light-green-color);
+    color: var(--green);
+    background-color: var(--light-green);
 }
 
 .green-text {
-    color: var(--green-color);
+    color: var(--green);
 }
 
 .yellow {
-    color: var(--orange-color);
-    background-color: var(--light-yellow-color);
+    color: var(--orange);
+    background-color: var(--light-yellow);
 }
 
 .yellow-text {
-    color: var(--orange-color);
+    color: var(--orange);
 }
 
 .right {
@@ -107,7 +107,7 @@ footer .right button {
     gap: 10px;
 }
 
-.flex div {
+.flex>* {
     vertical-align: middle;
     flex-grow: 1;
 }
@@ -116,7 +116,7 @@ footer .right button {
     margin: 10px;
     padding: 20px;
     border-radius: 10px;
-    border: 5px var(--yellow-color) dashed;
+    border: 5px var(--yellow) dashed;
 }
 
 #need-login p * {
@@ -143,7 +143,7 @@ footer .right button {
 
 #login-info {
     flex-grow: 0;
-    flex-basis: 66px;
+    flex-basis: 65px;
     border-radius: 8px;
     background-color: white;
     padding: 8px;
@@ -158,10 +158,11 @@ footer .right button {
 
 #login-info-menu {
     display: none;
-    width: 130px;
+    width: fit-content;
     position: absolute;
     top: 75px;
     right: 10px;
+    text-align: right;
     padding: 5px;
     border-radius: 5px;
     background-color: white;
@@ -193,7 +194,7 @@ footer .right button {
 }
 
 .shared-file-icon {
-    background-color: var(--light-yellow-color);
+    background-color: var(--light-yellow);
     font-size: small;
     border-radius: 5px;
     padding: 2px;
@@ -209,7 +210,7 @@ footer .right button {
 }
 
 #get-help {
-    background-color: var(--dark-blue-color);
+    background-color: var(--dark-blue);
     color: white;
     font-size: xx-large;
     border-radius: 5px;
@@ -218,8 +219,6 @@ footer .right button {
 
 
 #file-list {
-    border-radius: inherit;
-    margin-top: 10px;
     padding: 10px;
     background-color: white;
     height: 200px;
@@ -252,10 +251,11 @@ footer .right button {
 }
 
 .multi-operation {
-    border-radius: 5px;
+    text-align: center;
+    border-bottom-left-radius: 5px;
+    border-bottom-right-radius: 5px;
+    background-color: var(--light-green);
     padding: 5px;
-    margin: 8px;
-    border: 1px solid;
 }
 
 .multi-operation div {
@@ -275,7 +275,7 @@ footer .right button {
     padding-top: 100px;
 }
 
-#popup-shade {
+#popup-shader {
     display: none;
     opacity: 0.7;
     position: fixed;
@@ -392,8 +392,8 @@ footer .right button {
     margin-right: 4px;
     content: "|";
     border-radius: 5px;
-    color: var(--blue-color);
-    background-color: var(--blue-color);
+    color: var(--blue);
+    background-color: var(--blue);
 }
 
 .file-name {
@@ -449,7 +449,7 @@ footer .right button {
 #file-info small::before,
 #shared-file-info small::before {
     content: "✦";
-    color: var(--dark-blue-color);
+    color: var(--dark-blue);
 }
 
 #main-text-editor,
@@ -577,7 +577,7 @@ footer .right button {
     margin-left: 3px;
     margin-right: 5px;
     padding: 3px;
-    background-color: var(--light-blue-color);
+    background-color: var(--light-blue);
     border-radius: 5px 5px 0 0;
     transition-duration: .2s;
     border: 1px solid;
@@ -599,7 +599,7 @@ footer .right button {
 }
 
 #share-code-label {
-    color: var(--dark-blue-color);
+    color: var(--dark-blue);
     font-size: large;
     font-weight: bold;
 }
@@ -648,4 +648,15 @@ footer .right button {
     border-bottom: 1px solid;
     padding: 3px;
     border-radius: 3px;
+}
+
+.file-count-info {
+    background-color: var(--dark-blue);
+    text-align: center;
+    color: white;
+    margin-top: 10px;
+    font-size: small;
+    padding: 5px;
+    border-top-left-radius: 5px;
+    border-top-right-radius: 5px;
 }
