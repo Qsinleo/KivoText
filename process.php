@@ -58,7 +58,17 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         }
         return $readerlist;
     }
+    function randomToken()
+    {
+        $key = "";
+        $pattern = '1234567890abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLOMNOPQRSTUVWXYZ';
+        for ($i = 0; $i < 16; $i++) {
+            $key .= $pattern[mt_rand(0, strlen($pattern) - 1)];    //生成php随机数   
+        }
+        return $key;
+    }
     // 获得请求token对应ID
+    $token = randomToken();
     switch ($_REQUEST["type"]) {
         case "ping-back":
             echo "ping.receive";
@@ -67,14 +77,13 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             if (mysqli_num_rows(mysqli_query($con, "SELECT * FROM `users` WHERE `name` = '" . $_REQUEST["name"] . "'")) > 0) {
                 echo "register.error.alreadyExists";
             } else {
-                mysqli_query($con, "INSERT INTO `users` VALUES (NULL,'" . mysqli_escape_string($con, $_REQUEST["name"]) . "','" . $_REQUEST["passwordENC"] . "',CURRENT_TIMESTAMP(),'" . getRemoteIP() . "')");
+                mysqli_query($con, "INSERT INTO `users` VALUES (NULL,'" . mysqli_escape_string($con, $_REQUEST["name"]) . "','" . $_REQUEST["passwordENC"] . "',CURRENT_TIMESTAMP(),'" . getRemoteIP() . "','" . randomToken() . "','" . $token . "')");
                 $addid = mysqli_insert_id($con);
                 mysqli_query($con, "INSERT INTO `accessinfo` VALUES (" . $addid . "," . constant('default-file-length-limit') . "," . constant('default-files-count-limit') . ",1)");
                 if ($_REQUEST["keeplogined"] == "true") {
-                    // TODO:登录时间
-                    // COOKIE设置:已被移除
+                    setcookie("token", $token, time() + 7 * 24 * 3600);
                 } else {
-                    // COOKIE设置:已被移除
+                    setcookie("token", $token, time() + 1 * 24 * 3600);
                 }
                 echo "register.success";
             }
@@ -85,10 +94,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 echo "login.error.doesNotExistOrPasswordWrong";
             } else {
                 if ($_REQUEST["keeplogined"] == "true") {
-                    // COOKIE设置:已被移除
+                    setcookie("token", $token, time() + 7 * 24 * 3600);
                 } else {
-                    // COOKIE设置:已被移除
+                    setcookie("token", $token, time() + 1 * 24 * 3600);
                 }
+                mysqli_query($con, "UPDATE `users` SET `lastloginIP` = '" . getRemoteIP() . "', `token` = '" . $token . "' WHERE `id` = " . $res["id"]);
                 echo "login.success";
             }
             break;
@@ -102,7 +112,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             }
             echo json_encode([
                 "userinfo" => $queryArr2,
-                "needrelogin" => $queryArr2["lastloginIP"] != getRemoteIP(),
                 "constants" => [
                     "fileNameLimitLength" => 20,
                     "shareCodeLength" =>  constant('share-code-A-part-length') + constant('share-code-B-part-length'),

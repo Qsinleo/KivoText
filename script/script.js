@@ -302,8 +302,8 @@ function loadUserInfo(callback = {}) {
     loadingAnimation(true);
     sendRequest("type=request-info", (response) => {
         // 加载用户基本数据
-        if (response.needrelogin) {
-            alert("账号已在其他地方登录，点击“确定”重新登录。\n新的登录IP:" + response.userinfo.lastloginIP + "，如非你的操作，则可能已被盗号。");
+        if (response.userinfo.token != getCookie("token")) {
+            alert("账号已在其他地方登录，点击“确定”重新登录。\n新的登录IP：" + response.userinfo.lastloginIP + "，如非你的操作，则可能已被盗号。");
             logoutAndReload();
         }
         for (const each of document.getElementsByClassName("user-name-label")) {
@@ -345,6 +345,10 @@ function loadUserInfo(callback = {}) {
             document.getElementById("delete-file-able-label").className = "green-text";
             document.getElementById("delete-file-able-label").innerText = "可以";
         }
+
+        // 重置输入框
+        document.getElementById("search-file-name-input").value = "";
+        document.getElementById("search-file-size-select").value = "no-limit";
 
         // 加载文件
         document.getElementById("search-result-label").innerText = "";
@@ -508,6 +512,8 @@ function loadFileMeta(callback = {}, changeTextarea = false, fileid = document.g
 
 function logoutAndReload() {
     // 退出登录
+    loadingAnimation(true);
+    // document.cookie = "token=; max-age=-1";
     localStorage.removeItem("KivoText-username");
     localStorage.removeItem("KivoText-encpassword");
     location.reload();

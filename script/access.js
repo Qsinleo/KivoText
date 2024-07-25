@@ -15,7 +15,6 @@ document.getElementById("process-button").addEventListener("click", () => {
             document.getElementById("return-button").disabled = "";
             document.getElementById("process-button").innerText = "提交";
             document.getElementById("loading-circle").style.display = "none";
-            console.log(res);
             if (select == 0) {
                 switch (res) {
                     case "login.error.doesNotExistOrPasswordWrong":

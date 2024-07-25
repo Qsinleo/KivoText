@@ -651,9 +651,8 @@ footer .right button {
 }
 
 .file-count-info {
-    background-color: var(--dark-blue);
+    background-color: var(--light-blue);
     text-align: center;
-    color: white;
     margin-top: 10px;
     font-size: small;
     padding: 5px;

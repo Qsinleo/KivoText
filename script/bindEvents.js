@@ -213,6 +213,7 @@ function bindEvents(logined) {
             openPopup("user-meta");
         });
         document.getElementById("user-UA-label").innerText = navigator.userAgent;
+        document.getElementById("token-label").innerText = getCookie("token");
 
         document.getElementById("main-text-editor").onchange =
             document.getElementById("main-text-editor").onkeydown =
@@ -592,37 +593,38 @@ function bindEvents(logined) {
         }//文件操作
 
         {
-            document.getElementById("search-file-button").addEventListener("click", () => {
-                let matchCount = document.getElementsByClassName("file-label").length;
-                for (const iterator of document.getElementsByClassName("file-label")) {
-                    iterator.style.display = "";
-                }
-                for (const iterator of document.getElementsByClassName("file-label")) {
-                    function test(obj) {
-                        if (!obj && iterator.style.display != "none") {
-                            matchCount--;
-                            iterator.style.display = "none";
-                        }
+            document.getElementById("search-file-name-input").onkeyup = document.getElementById("search-file-name-input").onchange =
+                document.getElementById("search-file-size-select").onchange = () => {
+                    let matchCount = document.getElementsByClassName("file-label").length;
+                    for (const iterator of document.getElementsByClassName("file-label")) {
+                        iterator.style.display = "";
                     }
+                    for (const iterator of document.getElementsByClassName("file-label")) {
+                        function test(obj) {
+                            if (!obj && iterator.style.display != "none") {
+                                matchCount--;
+                                iterator.style.display = "none";
+                            }
+                        }
 
-                    test((document.getElementById("search-file-name-input").value == "") || ((
-                        document.getElementById("search-file-name-method").value == "include" && iterator.getElementsByClassName("file-name")[0].innerText.indexOf(document.getElementById("search-file-name-input").value) != -1
-                    ) || (
-                            document.getElementById("search-file-name-method").value == "equal" && iterator.getElementsByClassName("file-name")[0].innerText == document.getElementById("search-file-name-input").value
+                        test((document.getElementById("search-file-name-input").value == "") || ((
+                            document.getElementById("search-file-name-method").value == "include" && iterator.getElementsByClassName("file-name")[0].innerText.indexOf(document.getElementById("search-file-name-input").value) != -1
                         ) || (
-                            document.getElementById("search-file-name-method").value == "exclude" && iterator.getElementsByClassName("file-name")[0].innerText.indexOf(document.getElementById("search-file-name-input").value) == -1
-                        ))
-                    );
-                    test(document.getElementById("search-file-size-select").value == "no-limit" ||
-                        (document.getElementById("search-file-size-select").value == "empty" && iterator.dataset.filesize == 0) ||
-                        (document.getElementById("search-file-size-select").value == "1000-" && iterator.dataset.filesize > 0 && iterator.dataset.filesize <= 1000) ||
-                        (document.getElementById("search-file-size-select").value == "1000+" && iterator.dataset.filesize >= 1000)
-                    );
-                }
-                if (document.getElementById("search-file-name-input").value || document.getElementById("search-file-size-select").value != "no-limit") {
-                    document.getElementById("search-result-label").innerText = `筛选共${matchCount}个`;
-                }
-            });
+                                document.getElementById("search-file-name-method").value == "equal" && iterator.getElementsByClassName("file-name")[0].innerText == document.getElementById("search-file-name-input").value
+                            ) || (
+                                document.getElementById("search-file-name-method").value == "exclude" && iterator.getElementsByClassName("file-name")[0].innerText.indexOf(document.getElementById("search-file-name-input").value) == -1
+                            ))
+                        );
+                        test(document.getElementById("search-file-size-select").value == "no-limit" ||
+                            (document.getElementById("search-file-size-select").value == "empty" && iterator.dataset.filesize == 0) ||
+                            (document.getElementById("search-file-size-select").value == "1000-" && iterator.dataset.filesize > 0 && iterator.dataset.filesize <= 1000) ||
+                            (document.getElementById("search-file-size-select").value == "1000+" && iterator.dataset.filesize >= 1000)
+                        );
+                    }
+                    if (document.getElementById("search-file-name-input").value || document.getElementById("search-file-size-select").value != "no-limit") {
+                        document.getElementById("search-result-label").innerText = `筛选共${matchCount}个`;
+                    }
+                };
         }//搜索文件
     }
 }//绑定事件
