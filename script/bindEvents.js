@@ -623,6 +623,8 @@ function bindEvents(logined) {
                     }
                     if (document.getElementById("search-file-name-input").value || document.getElementById("search-file-size-select").value != "no-limit") {
                         document.getElementById("search-result-label").innerText = `筛选共${matchCount}个`;
+                    } else {
+                        document.getElementById("search-result-label").innerText = "";
                     }
                 };
         }//搜索文件

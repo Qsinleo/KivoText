@@ -254,7 +254,7 @@ footer .right button {
     text-align: center;
     border-bottom-left-radius: 5px;
     border-bottom-right-radius: 5px;
-    background-color: var(--light-green);
+    background-color: var(--light-bg);
     padding: 5px;
 }
 
@@ -651,7 +651,7 @@ footer .right button {
 }
 
 .file-count-info {
-    background-color: var(--light-blue);
+    background-color: var(--light-bg);
     text-align: center;
     margin-top: 10px;
     font-size: small;
