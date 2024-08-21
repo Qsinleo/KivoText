@@ -10,6 +10,7 @@ This file is a config for the file 'process.php'. Change this if necessary.
 // THESE ARE CONSTANTS
 const username = "root";
 const password = "";
+const host = "localhost";
 const database = "onlinetext";
 define('encrypt-key', '123456');
 define('share-code-A-part-length', 4);

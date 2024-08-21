@@ -26,7 +26,7 @@ document.getElementById("process-button").addEventListener("click", () => {
                         location.href = "index.html";
                         break;
                     default:
-                        document.body.getElementsByTagName("main")[0].innerHTML = "<h2>错误：请使用服务器运行，而不是直接打开文件！</h2>";
+                        document.body.getElementsByTagName("main")[0].innerHTML = `<h2>发生错误！</h2><details><code>${res}</code></details>`;
                         break;
                 }
             } else {
@@ -40,7 +40,7 @@ document.getElementById("process-button").addEventListener("click", () => {
                         location.href = "index.html";
                         break;
                     default:
-                        document.body.getElementsByTagName("main")[0].innerHTML = "<h2>错误：请使用服务器运行，而不是直接打开文件！</h2>";
+                        document.body.getElementsByTagName("main")[0].innerHTML = `<h2>发生错误！</h2><details><code>${res}</code></details>`;
                         break;
                 }
             }

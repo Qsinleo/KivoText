@@ -1,7 +1,7 @@
 <?php
 require_once "config.php";
 
-$con = mysqli_connect("localhost", username, password, database);
+$con = mysqli_connect(host, username, password, database);
 // if ($_SERVER['SERVER_ADDR'] == $_SERVER["REMOTE_ADDR"]) {
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     // 找到对应ID
